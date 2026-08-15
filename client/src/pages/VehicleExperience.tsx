@@ -38,6 +38,9 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
   const [frameIndex, setFrameIndex] = useState(0);
   const [loadedFrames, setLoadedFrames] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [departingFrame, setDepartingFrame] = useState<number | null>(null);
+  const [sparseTransition, setSparseTransition] = useState(0);
+  const [travelDirection, setTravelDirection] = useState<1 | -1>(1);
   const dragStart = useRef({ x: 0, position: 0 });
   const lastDrag = useRef({ x: 0, time: 0, velocity: 0 });
   const targetPosition = useRef(0);
@@ -46,6 +49,7 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
   const animationFrame = useRef<number | null>(null);
   const frameCount = frames.length;
   const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
+  const isSparseSequence = frameCount < 18;
   // تبقى اللفة الكاملة قريبة من 288px؛ تُباعد الزوايا القليلة حتى لا تدور السيارة بسرعة مضلّلة.
   const pixelsPerFrame = frameCount >= 18 ? 8 : Math.max(32, Math.round(288 / frameCount));
 
@@ -78,6 +82,13 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
   const revealFrame = (nextFrame: number) => {
     const wrapped = wrapFrame(nextFrame);
     if (wrapped === renderedFrame.current) return;
+    if (isSparseSequence) {
+      const rawDistance = wrapped - renderedFrame.current;
+      const shortestDistance = rawDistance > frameCount / 2 ? rawDistance - frameCount : rawDistance < -frameCount / 2 ? rawDistance + frameCount : rawDistance;
+      setTravelDirection(shortestDistance >= 0 ? 1 : -1);
+      setDepartingFrame(renderedFrame.current);
+      setSparseTransition((transition) => transition + 1);
+    }
     renderedFrame.current = wrapped;
     setFrameIndex(wrapped);
   };
@@ -92,7 +103,7 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
         animationFrame.current = null;
         return;
       }
-      displayedPosition.current += distance * 0.19;
+      displayedPosition.current += distance * (isSparseSequence ? 0.13 : 0.19);
       revealFrame(Math.round(displayedPosition.current));
       animationFrame.current = requestAnimationFrame(animate);
     };
@@ -132,7 +143,10 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
       }}
       onPointerUp={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-        targetPosition.current += Math.max(-4.5, Math.min(4.5, lastDrag.current.velocity * 135));
+        const inertia = isSparseSequence
+          ? Math.max(-0.45, Math.min(0.45, lastDrag.current.velocity * 40))
+          : Math.max(-4.5, Math.min(4.5, lastDrag.current.velocity * 135));
+        targetPosition.current += inertia;
         settleToTarget();
         setDragging(false);
       }}
@@ -142,7 +156,8 @@ function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[
         if (event.key === "ArrowLeft") { event.preventDefault(); nudge(-1); }
       }}
     >
-      <img className="spin-frame" src={frames[frameIndex]} alt={alt} draggable={false} />
+      {isSparseSequence && departingFrame !== null && <img key={`departing-${sparseTransition}`} className={`spin-frame sparse-spin-frame sparse-spin-departing direction-${travelDirection}`} src={frames[departingFrame]} alt="" draggable={false} aria-hidden="true" />}
+      <img key={`active-${isSparseSequence ? sparseTransition : frameIndex}`} className={`spin-frame${isSparseSequence ? ` sparse-spin-frame sparse-spin-arriving direction-${travelDirection}` : ""}`} src={frames[frameIndex]} alt={alt} draggable={false} />
       <div className="spin-hud" aria-hidden="true"><span>{spinLabel}</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
       <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : spinHint}</span></div>
     </div>
@@ -165,7 +180,7 @@ const vehicles: Record<string, VehicleFilm> = {
       "/manus-storage/haval-h6-hev-spin-04_968225b2.png", "/manus-storage/haval-h6-hev-spin-05_d0cb470d.png", "/manus-storage/haval-h6-hev-spin-06_d7c2ca05.png",
     ],
     spinLabel: "دوران 360° / 6 زوايا رسمية",
-    spinHint: "اسحب لاستكشاف الزوايا الست",
+    spinHint: "اسحب بهدوء عبر الزوايا الست",
     specification: [
       { label: "الفئة", value: "SUV هجينة" },
       { label: "القوة", value: "240 حصان" },
