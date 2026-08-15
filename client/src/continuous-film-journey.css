@@ -221,10 +221,8 @@
 .product-experience .continuous-film-stage .frame-spin-viewer { z-index: 1; inset: 0; }
 .product-experience .continuous-film-stage .frame-spin-viewer .spin-drag-hint { bottom: clamp(124px, 13vw, 164px); }
 
-/* طبقتا الصورة تخففان انتقال الإطار في تسلسل Tiggo الرسمي بدلاً من القطع المرئي. */
-.frame-spin-viewer .spin-frame-stack { position: absolute; z-index: 0; inset: 0; overflow: hidden; }
-.frame-spin-viewer .spin-frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; will-change: opacity; transition: opacity 92ms cubic-bezier(.23, 1, .32, 1); }
-.frame-spin-viewer .spin-frame.is-visible { opacity: 1; }
+/* عارض Tiggo يبدّل صورة واحدة جاهزة مسبقاً؛ لا تداخل أو تلاشي قد يسبب ومضة. */
+.frame-spin-viewer .spin-frame { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1; }
 .frame-spin-viewer.is-preloading .spin-drag-hint { opacity: .72; }
 
 @media (max-width: 820px) {
@@ -253,6 +251,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .product-experience .continuous-film-stage .film-image,
-  .product-experience .continuous-film-overlay,
-  .frame-spin-viewer .spin-frame { transition: none; transform: none; }
+  .product-experience .continuous-film-overlay { transition: none; transform: none; }
 }

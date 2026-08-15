@@ -34,7 +34,6 @@ type VehicleFilm = {
 
 function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
   const [frameIndex, setFrameIndex] = useState(0);
-  const [layers, setLayers] = useState({ active: "a" as "a" | "b", a: 0, b: 0 });
   const [loadedFrames, setLoadedFrames] = useState(0);
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef({ x: 0, position: 0 });
@@ -42,7 +41,6 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
   const targetPosition = useRef(0);
   const displayedPosition = useRef(0);
   const renderedFrame = useRef(0);
-  const layersRef = useRef({ active: "a" as "a" | "b", a: 0, b: 0 });
   const animationFrame = useRef<number | null>(null);
   const frameCount = frames.length;
   const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
@@ -78,13 +76,6 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
     if (wrapped === renderedFrame.current) return;
     renderedFrame.current = wrapped;
     setFrameIndex(wrapped);
-    const current = layersRef.current;
-    const nextActive = current.active === "a" ? "b" : "a";
-    const nextLayers: { active: "a" | "b"; a: number; b: number } = nextActive === "a"
-      ? { active: nextActive, a: wrapped, b: current.b }
-      : { active: nextActive, a: current.a, b: wrapped };
-    layersRef.current = nextLayers;
-    setLayers(nextLayers);
   };
 
   const settleToTarget = () => {
@@ -147,10 +138,7 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
         if (event.key === "ArrowLeft") { event.preventDefault(); nudge(-1); }
       }}
     >
-      <div className="spin-frame-stack" aria-hidden="true">
-        <img className={layers.active === "a" ? "spin-frame is-visible" : "spin-frame"} src={frames[layers.a]} alt="" draggable={false} />
-        <img className={layers.active === "b" ? "spin-frame is-visible" : "spin-frame"} src={frames[layers.b]} alt={alt} draggable={false} />
-      </div>
+      <img className="spin-frame" src={frames[frameIndex]} alt={alt} draggable={false} />
       <div className="spin-hud" aria-hidden="true"><span>دوران خارجي / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
       <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : "اسحب لتدور السيارة"}</span></div>
     </div>
