@@ -1,348 +1,353 @@
 /**
- * Design reminder — استديو الحركة الساكنة:
- * واجهة RTL سينمائية بفحم وأمبر وسماوي، وصور منتجات رسمية فقط.
- * كل بطاقة سيارة هي «كتالوج مرجعي» لا مخزون حي؛ العرض ثلاثي الأبعاد هو تفاعل واجهة وليس نموذج GLB للسيارة.
+ * Design reminder — استديو الحركة الساكنة (النسخة الموسعة):
+ * السيارة هي بطلة المشهد؛ مسار عمودي سينمائي، أمبر/سماوي، ومعلومات معرض داخلية فقط.
+ * مشاهد التجميع طبقات صور رسمية متعددة وليست ادعاءً لنموذج 360° أو لمخزون حي.
  */
-import { useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowDownLeft,
   ArrowUpLeft,
+  BadgeCheck,
+  CalendarDays,
+  Check,
+  ChevronDown,
   ChevronLeft,
-  CircleCheck,
-  ExternalLink,
+  CircleGauge,
+  Crosshair,
   Gauge,
+  Layers3,
   Menu,
-  MoveDiagonal2,
+  MousePointer2,
+  MoveRight,
   Play,
+  Plus,
   Rotate3D,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   X,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type Vehicle = {
+type Feature = { title: string; caption: string; image: string; label: string };
+type Car = {
   id: string;
-  scene: string;
+  number: string;
   brand: string;
   name: string;
-  category: string;
-  image: string;
-  alt: string;
-  accent: "amber" | "cyan";
-  officialPage: string;
-  sourceLabel: string;
+  className: string;
   price: string;
-  specs: { label: string; value: string }[];
-  note: string;
+  hero: string;
+  cutout: string;
+  images: { exterior: string[]; interior: string[]; detail: string[] };
+  headline: string;
+  copy: string;
+  stats: { label: string; value: string }[];
+  features: Feature[];
+  color: "cyan" | "amber";
+  source: string;
 };
 
-const vehicles: Vehicle[] = [
+const cars: Car[] = [
   {
-    id: "haval-h6",
-    scene: "SCENE 01",
+    id: "h6-hev",
+    number: "01",
     brand: "HAVAL",
     name: "H6 HEV",
-    category: "SUV هجينة",
-    image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
-    alt: "صورة المنتج الرسمية لهافال H6 HEV من موقع Haval Egypt",
-    accent: "cyan",
-    officialPage: "https://greatwall.eg/en/model/h6-hev/",
-    sourceLabel: "Haval Egypt / GB Auto",
-    price: "1,515,000 ج.م",
-    specs: [
-      { label: "المحرك", value: "1.5T HEV" },
+    className: "SUV هجينة",
+    price: "يبدأ مرجعياً من 1,515,000 ج.م",
+    hero: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
+    cutout: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
+    images: {
+      exterior: [
+        "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg",
+        "/manus-storage/haval-h6-wheel-mirror_99bc238f.jpg",
+        "/manus-storage/haval-h6-light-roof_017bed29.jpg",
+      ],
+      interior: [
+        "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg",
+        "/manus-storage/haval-h6-dashboard_49304907.jpg",
+        "/manus-storage/haval-h6-gear-shifter_7c71bf57.jpg",
+        "/manus-storage/haval-h6-steering_cc0d559f.jpg",
+      ],
+      detail: ["/manus-storage/haval-h6-performance_271a398e.jpg"],
+    },
+    headline: "هجينة، هادئة، ومصممة للمشوار الطويل.",
+    copy: "بنية مرجعية تجمع استجابة محرك 1.5T HEV مع تجربة قيادة مركزة على السلاسة. اختر الفئة المتاحة لدى الفرع قبل اتخاذ القرار.",
+    stats: [
       { label: "القوة", value: "240 حصان" },
-      { label: "ناقل الحركة", value: "DHT" },
       { label: "العزم", value: "530 ن.م" },
+      { label: "ناقل الحركة", value: "DHT" },
+      { label: "المحرك", value: "1.5T HEV" },
     ],
-    note: "سعر بداية ومواصفات من صفحة المنتج الرسمية وقت التحقق؛ تأكد من التوفر والسعر لدى فرعك.",
+    features: [
+      { title: "خطوط تلتقط الضوء", caption: "واجهة مميزة وتفاصيل خارجية محسوبة.", image: "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg", label: "EXTERIOR / 01" },
+      { title: "قيادة في مدى النظر", caption: "مقصورة رقمية مبنية حول السائق.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", label: "CABIN / 02" },
+      { title: "تفاصيل لا تتوقف", caption: "إضاءة وسقف بانورامي في لغة خارجية واحدة.", image: "/manus-storage/haval-h6-light-roof_017bed29.jpg", label: "DETAIL / 03" },
+    ],
+    color: "cyan",
+    source: "الصور والمواصفات المرجعية مأخوذة من صفحة المنتج الرسمية لهافال مصر وقت التحقق. التوفر والفئة والسعر النهائي تؤكدها إدارة المعرض.",
   },
   {
-    id: "chery-tiggo8",
-    scene: "SCENE 02",
+    id: "tiggo-8",
+    number: "02",
     brand: "CHERY",
     name: "Tiggo 8 Pro Max",
-    category: "SUV — 7 مقاعد",
-    image: "/manus-storage/chery-tiggo-8-product-official_68e7c700.png",
-    alt: "صورة المنتج الرسمية لشيري Tiggo 8 Pro Max من موقع Chery Egypt",
-    accent: "amber",
-    officialPage: "https://www.chery-eg.com/en/car/tiggo-8-pro-max",
-    sourceLabel: "Chery Egypt / GB Auto",
-    price: "1,620,000 ج.م",
-    specs: [
-      { label: "المحرك", value: "1.6L Turbo" },
+    className: "SUV — 7 مقاعد",
+    price: "يبدأ مرجعياً من 1,620,000 ج.م",
+    hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
+    cutout: "/manus-storage/chery-t8-color-black_9061013c.png",
+    images: {
+      exterior: [
+        "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg",
+        "/manus-storage/chery-t8-exterior-side_8d0a9686.jpg",
+        "/manus-storage/chery-t8-exterior-rear_9e1acbf8.jpg",
+      ],
+      interior: [
+        "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg",
+        "/manus-storage/chery-t8-console_54e44c61.jpg",
+        "/manus-storage/chery-t8-dashboard_e46e2534.jpg",
+        "/manus-storage/chery-t8-seats_0a82b3e5.jpg",
+      ],
+      detail: ["/manus-storage/chery-t8-performance_e43470df.jpg"],
+    },
+    headline: "مساحة أكبر، حضور أوضح، وثلاثة صفوف للمشوار كله.",
+    copy: "تجربة SUV عائلية مرجعية تجمع ثلاث صفوف وتفاصيل مقصورة مترابطة. راجع مع الفرع الألوان والفئة المتاحة قبل الحجز.",
+    stats: [
       { label: "القوة", value: "197 حصان" },
+      { label: "العزم", value: "290 ن.م" },
       { label: "ناقل الحركة", value: "7DCT" },
-      { label: "المقاعد", value: "3 صفوف" },
+      { label: "المحرك", value: "1.6L Turbo" },
     ],
-    note: "صورة المنتج والمواصفات من المصدر الرسمي؛ لا تمثل إعلاناً عن مخزون متاح حالياً لدى الكموني.",
-  },
-  {
-    id: "haval-jolion",
-    scene: "SCENE 03",
-    brand: "HAVAL",
-    name: "Jolion Facelift",
-    category: "SUV مدمجة",
-    image: "/manus-storage/haval-jolion-official_b9653e2e.jpg",
-    alt: "صورة المنتج الرسمية لهافال Jolion Facelift من موقع Haval Egypt",
-    accent: "amber",
-    officialPage: "https://greatwall.eg/en/",
-    sourceLabel: "Haval Egypt / GB Auto",
-    price: "985,000 ج.م",
-    specs: [
-      { label: "الفئة", value: "SUV" },
-      { label: "السعر", value: "سعر بداية" },
-      { label: "المرجع", value: "Haval Egypt" },
-      { label: "الحالة", value: "تحقق من التوفر" },
+    features: [
+      { title: "تصل قبل أن تتكلم", caption: "شبك عريض وخطوط تمنح الواجهة حضوراً متزناً.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", label: "EXTERIOR / 01" },
+      { title: "مكان للجميع", caption: "ثلاثة صفوف في مقصورة متصلة بصرياً.", image: "/manus-storage/chery-t8-seats_0a82b3e5.jpg", label: "CABIN / 02" },
+      { title: "شاشة في قلب الرحلة", caption: "تفاصيل قيادة ومعلومات ضمن لوحة مترابطة.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", label: "TECH / 03" },
     ],
-    note: "السعر مذكور في الصفحة الرئيسية الرسمية لهافال مصر وقت التحقق؛ يتغير حسب الفئة والعروض والتوفر.",
+    color: "amber",
+    source: "الصور والمواصفات المرجعية مأخوذة من صفحة المنتج الرسمية لشيري مصر وقت التحقق. التوفر والفئة والسعر النهائي تؤكدها إدارة المعرض.",
   },
 ];
 
-const capabilities = [
-  { title: "صور رسمية فقط", text: "كل لقطة سيارة هنا من موقع العلامة أو وكيلها الرسمي، مع رابط مصدر ظاهر.", icon: ShieldCheck },
-  { title: "تفاصيل بلا تخمين", text: "السعر والمواصفات تنسب للمصدر، ولا نعرض قيمة غير موثقة كسعر معرض.", icon: CircleCheck },
-  { title: "تجربة بصرية متحركة", text: "مشهد تفاعلي بعمق وطبقات؛ عارض 3D حقيقي ينتظر ملفات المنتج الرسمية GLB/360°.", icon: Rotate3D },
+const serviceSteps = [
+  ["01", "اختر المشهد", "قارن الموديلات واقرأ المواصفات داخل موقع المعرض."],
+  ["02", "ثبّت التوفر", "أرسل طلبك، ثم أكد الفئة واللون مع الفريق قبل الحجز."],
+  ["03", "عاين بهدوء", "اختر الفرع الأنسب وحدد موعداً عندما تتوفر بياناته المعتمدة."],
 ];
 
-function scrollToId(id: string) {
+function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function VehicleStage({ vehicle, onOpen }: { vehicle: Vehicle; onOpen: () => void }) {
-  const stageRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [angle, setAngle] = useState(0);
-
-  const sceneStyle = useMemo(
-    () => ({
-      transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y + angle}deg)`,
-    }),
-    [tilt, angle],
-  );
-
-  const updateTilt = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: y * -5, y: x * 8 });
-  };
-
+function ImageRail({ images, onSelect }: { images: string[]; onSelect: (image: string) => void }) {
   return (
-    <article className={`vehicle-scene ${vehicle.accent}`} id={vehicle.id}>
-      <div className="scene-index" aria-hidden="true">
-        <span>{vehicle.scene}</span>
-        <i />
-      </div>
-      <div className="scene-copy">
-        <p className="eyebrow">{vehicle.brand} / صورة منتج رسمية</p>
-        <h3>{vehicle.name}</h3>
-        <p className="vehicle-category">{vehicle.category}</p>
-        <div className="scene-specs">
-          {vehicle.specs.slice(0, 3).map((spec) => (
-            <div key={spec.label}>
-              <span>{spec.label}</span>
-              <b>{spec.value}</b>
-            </div>
-          ))}
-        </div>
-        <button className="text-action" onClick={onOpen}>
-          اكتشف التفاصيل <ChevronLeft size={18} />
+    <div className="image-rail" aria-label="صور مرجعية رسمية للطراز">
+      {images.map((image, index) => (
+        <button key={image} onClick={() => onSelect(image)} aria-label={`فتح الصورة المرجعية ${index + 1}`}>
+          <img src={image} alt="تفصيل رسمي للطراز" />
+          <span>0{index + 1}</span>
         </button>
-      </div>
-      <div
-        className="vehicle-stage"
-        ref={stageRef}
-        onMouseMove={updateTilt}
-        onMouseLeave={() => setTilt({ x: 0, y: 0 })}
-      >
-        <div className="stage-rings" aria-hidden="true" />
-        <div className="stage-orbit orbit-one" aria-hidden="true" />
-        <div className="stage-orbit orbit-two" aria-hidden="true" />
-        <div className="vehicle-layer" style={sceneStyle}>
-          <img src={vehicle.image} alt={vehicle.alt} />
-          <div className="vehicle-shadow" aria-hidden="true" />
-        </div>
-        <div className="stage-controls" aria-label="زوايا بصرية للمشهد">
-          {[0, 7, -7].map((value, index) => (
-            <button
-              key={value}
-              className={angle === value ? "active" : ""}
-              onClick={() => setAngle(value)}
-              aria-label={`زاوية العرض ${index + 1}`}
-            >
-              0{index + 1}
-            </button>
-          ))}
-        </div>
-        <div className="stage-note"><MoveDiagonal2 size={15} /> حرّك المؤشر داخل المشهد</div>
-      </div>
-    </article>
+      ))}
+    </div>
   );
 }
 
 export default function Home() {
-  const [activeVehicle, setActiveVehicle] = useState<Vehicle | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [activeId, setActiveId] = useState(cars[0].id);
+  const [activeTab, setActiveTab] = useState<"overview" | "design" | "cabin" | "performance">("overview");
+  const [buildStarted, setBuildStarted] = useState(false);
+  const [viewerImage, setViewerImage] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [formSent, setFormSent] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const buildRef = useRef<HTMLElement>(null);
+  const activeCar = useMemo(() => cars.find((car) => car.id === activeId) ?? cars[0], [activeId]);
 
-  const openVehicle = (vehicle: Vehicle) => setActiveVehicle(vehicle);
+  useEffect(() => {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0);
+    };
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("is-visible")),
+      { threshold: 0.14 },
+    );
+    document.querySelectorAll<HTMLElement>("[data-reveal]").forEach((element) => observer.observe(element));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => { observer.disconnect(); window.removeEventListener("scroll", onScroll); };
+  }, []);
+
+  useEffect(() => {
+    setBuildStarted(false);
+    setActiveTab("overview");
+    const timer = window.setTimeout(() => setBuildStarted(true), 450);
+    return () => window.clearTimeout(timer);
+  }, [activeId]);
+
+  const selectCar = (id: string) => {
+    setActiveId(id);
+    setTimeout(() => scrollToSection("studio"), 60);
+  };
+
+  const submitBooking = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormSent(true);
+  };
+
+  const previewImages = activeTab === "design" ? activeCar.images.exterior : activeTab === "cabin" ? activeCar.images.interior : activeTab === "performance" ? activeCar.images.detail : [...activeCar.images.exterior, ...activeCar.images.interior];
 
   return (
-    <main dir="rtl" className="site-shell">
-      <div className="topline" aria-hidden="true" />
+    <main dir="rtl" className={`site-shell expanded ${activeCar.color}`}>
+      <div className="page-progress" style={{ transform: `scaleX(${scrollProgress / 100})` }} aria-hidden="true" />
+      <aside className="scene-rail" aria-hidden="true">
+        <span>EL KAMONY / AUTOMOTIVE</span><i /><span>06 : 2026</span>
+      </aside>
+
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="الكموني أوتوموتيف — الصفحة الرئيسية">
-          <img src="/manus-storage/el-kamony-route-mark_2c25ea4f.png" alt="رمز بصري مجرد" />
-          <span>
-            <b>الكموني</b>
-            <small>AUTOMOTIVE</small>
-          </span>
+        <a className="brand" href="#top" onClick={(event) => { event.preventDefault(); scrollToSection("top"); }} aria-label="الكموني أوتوموتيف">
+          <img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="رمز بصري مجرد للكموني أوتوموتيف" />
+          <span><b>الكموني</b><small>AUTOMOTIVE</small></span>
         </a>
-        <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="فتح القائمة">
-          {isMenuOpen ? <X size={21} /> : <Menu size={22} />}
-        </button>
-        <nav className={isMenuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
-          <button onClick={() => scrollToId("models")}>الطرازات</button>
-          <button onClick={() => scrollToId("why-us")}>المنهج</button>
-          <button onClick={() => scrollToId("sources")}>المصادر</button>
-          <button onClick={() => setIsContactOpen(true)}>تواصل</button>
+        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح القائمة">{menuOpen ? <X size={22} /> : <Menu size={23} />}</button>
+        <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
+          <button onClick={() => { scrollToSection("fleet"); setMenuOpen(false); }}>الأسطول</button>
+          <button onClick={() => { scrollToSection("studio"); setMenuOpen(false); }}>المشهد ثلاثي الأبعاد</button>
+          <button onClick={() => { scrollToSection("experience"); setMenuOpen(false); }}>تجربتك</button>
+          <button onClick={() => { scrollToSection("contact"); setMenuOpen(false); }}>تواصل</button>
         </nav>
-        <button className="header-cta" onClick={() => setIsContactOpen(true)}>
-          <span>اطلب تحديث التوفر</span><ArrowUpLeft size={17} />
-        </button>
+        <button className="header-cta" onClick={() => { setBookingOpen(true); setFormSent(false); }}><CalendarDays size={16} /> احجز معاينة</button>
       </header>
 
-      <section className="hero" id="top">
-        <img className="hero-texture" src="/manus-storage/studio-amber-light_cc937bc1.png" alt="" />
-        <div className="hero-grid" aria-hidden="true" />
-        <div className="hero-copy">
-          <div className="hero-kicker"><span /> اختيار يسبق المشوار</div>
-          <h1>السيارة المناسبة<br /><em>تبدأ من التفاصيل.</em></h1>
-          <p>تجربة كتالوج بصري للكموني أوتوموتيف، مبنية على صور ومواصفات صادرة من المصادر الرسمية للعلامات.</p>
+      <section className="hero-full" id="top">
+        <div className="hero-noise" aria-hidden="true" />
+        <div className="signature-route hero-route" aria-hidden="true"><i /><i /><i /></div>
+        <div className="hero-copy" data-reveal>
+          <p className="hero-eyebrow"><BadgeCheck size={14} /> معرض رقمي — معلومات واضحة</p>
+          <h1>المشوار الكبير<br /><em>يبدأ من نظرة.</em></h1>
+          <p className="hero-lead">كل ما تحتاجه للاستكشاف داخل موقع الكموني أوتوموتيف: موديلات مرجعية، تفاصيل دقيقة، وحجز معاينة في تجربة واحدة.</p>
           <div className="hero-actions">
-            <button className="primary-button" onClick={() => scrollToId("models")}>شاهد الطرازات <ChevronLeft size={19} /></button>
-            <button className="ghost-button" onClick={() => scrollToId("sources")}><Play size={15} fill="currentColor" /> كيف نتحقق؟</button>
+            <button className="primary-button" onClick={() => scrollToSection("fleet")}>استكشف السيارات <ChevronLeft size={19} /></button>
+            <button className="secondary-button" onClick={() => scrollToSection("studio")}><Rotate3D size={18} /> شاهد التجميع البصري</button>
+          </div>
+          <div className="hero-trust"><span>صور رسمية</span><i /><span>لا تحويلات خارجية</span><i /><span>تأكيد التوفر قبل الحجز</span></div>
+        </div>
+        <div className="hero-car-stage" data-reveal>
+          <div className="hero-scanline" />
+          <p className="hero-serial">REFERENCE MODEL / H6 HEV / 01</p>
+          <div className="hero-image-crop"><img src="/manus-storage/haval-h6-hev-official_edb3204f.jpg" alt="هافال H6 HEV — صورة رسمية مرجعية" /></div>
+          <div className="hero-data-chip chip-one"><span>240</span><small>HP / HEV</small></div>
+          <div className="hero-data-chip chip-two"><span>530</span><small>N.M / TORQUE</small></div>
+          <div className="hero-arc arc-a" /><div className="hero-arc arc-b" />
+          <button className="hero-scroll" onClick={() => scrollToSection("fleet")} aria-label="الانتقال إلى الأسطول"><ArrowDownLeft size={18} /><span>SCROLL TO EXPLORE</span></button>
+        </div>
+      </section>
+
+      <section className="ticker" aria-label="تعريف بالخدمة"><div>اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i> الكموني أوتوموتيف <i>•</i> اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i></div></section>
+
+      <section className="fleet-section" id="fleet">
+        <div className="paper-meta" aria-hidden="true"><span>INSPECTION PAPER / 01</span><div className="signature-route"><i /><i /><i /></div><span>EL KAMONY / FILED</span></div>
+        <div className="section-top" data-reveal>
+          <div className="section-label"><span>01</span><i /> الأسطول المرجعي</div>
+          <div><p className="mono-tag">SELECT / COMPARE / ASK</p><h2>اختر المشهد<br /><em>الذي يشبهك.</em></h2></div>
+          <p>هذه مجموعة استكشاف مرجعية مبنية على الطرازات والصور الرسمية المتاحة. الأسعار والفئات ليست التزاماً بمخزون؛ ثبّت اختيارك معنا أولاً.</p>
+        </div>
+        <div className="fleet-grid">
+          {cars.map((car) => (
+            <article className={`fleet-card ${car.color} ${activeId === car.id ? "selected" : ""}`} key={car.id} data-reveal>
+              <div className="fleet-card-image"><img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} /><div className="fleet-glow" /></div>
+              <div className="fleet-card-index"><span>{car.number}</span><span>{car.brand}</span></div>
+              <div className="fleet-card-body"><p>{car.className}</p><h3>{car.name}</h3><small>{car.price}</small></div>
+              <button className="card-action" onClick={() => selectCar(car.id)}>ادخل المشهد <ArrowUpLeft size={18} /></button>
+            </article>
+          ))}
+          <article className="fleet-card inquiry-card" data-reveal>
+            <div className="inquiry-pattern"><Crosshair size={56} /><span>YOUR NEXT / 03</span></div>
+            <div className="fleet-card-body"><p>طراز آخر؟</p><h3>قل لنا ما تبحث عنه.</h3><small>اطلب إضافة طراز أو تأكيد متاح.</small></div>
+            <button className="card-action" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلبك <Plus size={18} /></button>
+          </article>
+        </div>
+      </section>
+
+      <section className="studio-section" id="studio" ref={buildRef}>
+        <div className="studio-head" data-reveal>
+          <div className="section-label inverse"><span>02</span><i /> 3D VISUAL STUDIO</div>
+          <div><p className="mono-tag accent">ASSEMBLY / OFFICIAL ANGLES</p><h2>سيارة تُبنى<br /><em>أمام عينيك.</em></h2></div>
+          <div className="model-switch" role="tablist" aria-label="اختيار طراز المشهد">
+            {cars.map((car) => <button key={car.id} className={activeId === car.id ? "active" : ""} onClick={() => setActiveId(car.id)} role="tab"><span>{car.number}</span>{car.brand} {car.name}</button>)}
           </div>
         </div>
-        <div className="hero-visual" aria-label="مشهد بصري تجريدي للعلامة">
-          <img className="hero-car" src="/manus-storage/haval-h6-hev-official_edb3204f.jpg" alt="صورة المنتج الرسمية لهافال H6 HEV من موقع Haval Egypt" />
-          <div className="hero-verified"><CircleCheck size={15} /> VERIFIED PRODUCT IMAGE</div>
-          <img className="hero-sigil" src="/manus-storage/el-kamony-route-mark_2c25ea4f.png" alt="" />
-          <div className="hero-counter"><span>01</span><i /><span>03</span></div>
-          <div className="hero-pulse pulse-one" />
-          <div className="hero-pulse pulse-two" />
-          <div className="hero-orbit"><span>STUDIO / VERIFIED / 2026</span></div>
-          <div className="hero-caption"><b>CATALOGUE</b><span>من المصدر إلى قرارك</span></div>
-        </div>
-        <div className="hero-footnote">ملاحظة: الصور منتجات رسمية مرجعية، وليست إعلاناً عن مخزون لحظي.</div>
-      </section>
-
-      <section className="marquee" aria-label="سطر معلومات">
-        <div>CHERY <span>•</span> HAVAL <span>•</span> معلومات واضحة <span>•</span> مصادر رسمية <span>•</span> اسأل عن التوفر <span>•</span> CHERY <span>•</span> HAVAL <span>•</span></div>
-      </section>
-
-      <section className="intro-section" id="why-us">
-        <div className="section-marker"><span>01</span><i /> المنهج</div>
-        <div className="intro-content">
-          <div className="inspection-rail"><span>INSPECTION SHEET</span><i /><span>VERIFIED / SOURCE-LED</span></div>
-          <h2>مكان واحد لبدء<br />اختيارك <em>بوضوح.</em></h2>
-          <p>هذه واجهة نموذجية لعرض طرازات العلامات التي يظهر ارتباطها بالكموني أوتوموتيف. لا يتم افتراض السعر النهائي، ولا توفر السيارة، ولا تفاصيل الفئة قبل تأكيدها من الفرع.</p>
-          <div className="inspection-readout"><span>STATUS</span><b>SELECT / VERIFY / DRIVE</b><i /><span>EDITION 26</span></div>
-        </div>
-        <div className="capability-list">
-          {capabilities.map(({ title, text, icon: Icon }, index) => (
-            <div className="capability" key={title}>
-              <span className="cap-number">0{index + 1}</span>
-              <Icon size={21} />
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="models-section" id="models">
-        <div className="edge-rail"><span>02 / CATALOGUE</span><i /><span>RIGHT-EDGE INFORMATION SYSTEM</span></div>
-        <div className="models-header">
-          <div>
-            <p className="eyebrow">CATALOGUE / SELECTED REFERENCES</p>
-            <h2>حرّك المشهد.<br /><em>اقرأ السيارة.</em></h2>
+        <div
+          className={`assembly-stage ${buildStarted ? "assembled" : ""}`}
+          onMouseMove={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -5, y: ((event.clientX - rect.left) / rect.width - .5) * 7 });
+          }}
+          onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+          style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg` } as React.CSSProperties}
+        >
+          <div className="stage-grid" /><div className="stage-disc disc-one" /><div className="stage-disc disc-two" />
+          <div className="stage-numbers" aria-hidden="true"><span>FRAME / {activeCar.number}</span><span>OPTICAL BUILD</span><span>0° / 360°</span></div>
+          <div className="assembly-car" aria-label={`مشهد تجميع بصري لـ${activeCar.brand} ${activeCar.name}`}>
+            <img className="assembly-base" src={activeCar.cutout} alt={`${activeCar.name} — صورة رسمية في مشهد تجميع بصري`} />
+            <img className="assembly-fragment fragment-front" src={activeCar.images.exterior[0]} alt="" />
+            <img className="assembly-fragment fragment-side" src={activeCar.images.exterior[1]} alt="" />
+            <img className="assembly-fragment fragment-rear" src={activeCar.images.exterior[2]} alt="" />
+            <div className="assembly-laser laser-a" /><div className="assembly-laser laser-b" />
           </div>
-          <p>تفاعل مع الطبقات لرؤية عمق التصميم. العرض هنا بصري ثلاثي الأبعاد؛ عارض السيارة الدوراني الكامل يحتاج أصول 360° أو ملفات 3D مرخصة من العلامة.</p>
+          <div className="assembly-console">
+            <button className="assemble-button" onClick={() => setBuildStarted(!buildStarted)}><Layers3 size={18} /> {buildStarted ? "أعد المشهد" : "ابدأ التجميع"}</button>
+            <p><MousePointer2 size={14} /> حرّك المؤشر لتغيير عمق المشهد</p>
+          </div>
+          <div className="stage-stamp"><Rotate3D size={17} /><span>VISUAL<br />ASSEMBLY</span></div>
         </div>
-        <div className="vehicle-list">
-          {vehicles.map((vehicle) => <VehicleStage key={vehicle.id} vehicle={vehicle} onOpen={() => openVehicle(vehicle)} />)}
+        <div className="studio-disclaimer"><ShieldCheck size={15} /> هذا تجميع بصري من لقطات رسمية متعددة، وليس نموذج سيارة ثلاثي الأبعاد كاملاً أو إثباتاً لمخزون فوري.</div>
+      </section>
+
+      <section className="detail-section">
+        <div className="detail-rail" aria-hidden="true"><span>{activeCar.number}</span><i /><span>{activeCar.brand}</span></div>
+        <div className="detail-copy" data-reveal>
+          <p className="mono-tag">MODEL FILE / {activeCar.brand}</p><h2>{activeCar.name}</h2><p className="model-class">{activeCar.className}</p><p className="detail-lead">{activeCar.headline}</p><p className="detail-text">{activeCar.copy}</p>
+          <div className="stat-grid">{activeCar.stats.map((stat) => <div key={stat.label}><span>{stat.label}</span><b>{stat.value}</b></div>)}</div>
+          <div className="detail-actions"><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اسأل عن التوفر <ChevronLeft size={19} /></button><button className="outline-button" onClick={() => setViewerImage(activeCar.hero)}>شاهد اللقطة الكاملة <MoveRight size={18} /></button></div>
+        </div>
+        <div className="detail-media" data-reveal>
+          <div className="media-tabs" role="tablist">
+            <button className={activeTab === "overview" ? "active" : ""} onClick={() => setActiveTab("overview")}>نظرة</button>
+            <button className={activeTab === "design" ? "active" : ""} onClick={() => setActiveTab("design")}>الخارج</button>
+            <button className={activeTab === "cabin" ? "active" : ""} onClick={() => setActiveTab("cabin")}>المقصورة</button>
+            <button className={activeTab === "performance" ? "active" : ""} onClick={() => setActiveTab("performance")}>الأداء</button>
+          </div>
+          <div className="featured-media"><img src={previewImages[0]} alt={`لقطة ${activeTab} رسمية لـ${activeCar.name}`} /><button onClick={() => setViewerImage(previewImages[0])}><Plus size={18} /> تكبير الصورة</button></div>
+          <ImageRail images={previewImages} onSelect={setViewerImage} />
         </div>
       </section>
 
-      <section className="source-section" id="sources">
-        <img src="/manus-storage/studio-cyan-detail_f071925d.png" className="source-texture" alt="" />
-        <div className="section-marker light"><span>02</span><i /> المصدر</div>
-        <div className="source-intro">
-          <div className="inspection-rail"><span>SOURCE SHEET</span><i /><span>IMAGE / SPEC / LINK</span></div>
-          <p className="eyebrow">لا صورة بلا نسبة</p>
-          <h2>كل سيارة هنا<br /><em>لها صفحة أصل.</em></h2>
-          <p>تتصل البطاقة بصفحة المنتج الرسمية حتى يمكن مراجعة اللون، المواصفات، وعروض الشركة الأم مباشرة.</p>
-        </div>
-        <div className="source-cards">
-          {vehicles.map((vehicle) => (
-            <a className="source-card" key={vehicle.id} href={vehicle.officialPage} target="_blank" rel="noreferrer">
-              <span>{vehicle.scene}</span>
-              <b>{vehicle.brand} / {vehicle.name}</b>
-              <small>{vehicle.sourceLabel}</small>
-              <ExternalLink size={17} />
-            </a>
-          ))}
+      <section className="feature-section">
+        <div className="paper-meta" aria-hidden="true"><span>INSPECTION PAPER / 03</span><div className="signature-route"><i /><i /><i /></div><span>VISUAL EVIDENCE / FILED</span></div>
+        <div className="section-top compact" data-reveal><div className="section-label"><span>03</span><i /> اقرأ التفاصيل</div><div><p className="mono-tag">FROM OUTSIDE / TO INSIDE</p><h2>كل لقطة<br /><em>تكمل الأخرى.</em></h2></div></div>
+        <div className="feature-strip">
+          {activeCar.features.map((feature, index) => <article className="feature-panel" key={feature.title} data-reveal><div className="feature-image"><img src={feature.image} alt={`${activeCar.name} — ${feature.title}`} /><span>{feature.label}</span><button onClick={() => setViewerImage(feature.image)} aria-label={`تكبير ${feature.title}`}><Plus size={18} /></button></div><div><b>0{index + 1}</b><h3>{feature.title}</h3><p>{feature.caption}</p></div></article>)}
         </div>
       </section>
 
-      <section className="cta-section">
-        <div className="cta-serial">KAM-26 / <span>CONTACT</span></div>
-        <Sparkles size={28} />
-        <h2>هل تريد السيارة<br />أن <em>تتكلم بوضوح؟</em></h2>
-        <p>تواصل لتأكيد الفئة واللون والسعر وموعد المعاينة في الفرع المناسب.</p>
-        <button className="primary-button" onClick={() => setIsContactOpen(true)}>ابدأ الاستفسار <ChevronLeft size={19} /></button>
+      <section className="experience-section" id="experience">
+        <div className="experience-visual" data-reveal><img src={activeCar.images.interior[0]} alt={`مقصورة ${activeCar.name} — صورة رسمية`} /><div className="experience-lens"><span>READY<br />WHEN YOU ARE</span></div></div>
+        <div className="experience-copy" data-reveal><div className="section-label inverse"><span>04</span><i /> التجربة</div><p className="mono-tag accent">FROM SCREEN TO SEAT</p><h2>من الشاشة<br /><em>إلى المقعد.</em></h2><p>الموقع يفتح لك طريقاً منظماً للمعاينة: حدّد ما يناسبك، وثبّت المعلومات، ثم اطلب موعداً مناسباً. لا يتم إرسال أي طلب فعلي قبل ربط بيانات التواصل الرسمية للمعرض.</p><div className="steps">{serviceSteps.map(([number, title, text]) => <div key={number}><span>{number}</span><section><h3>{title}</h3><p>{text}</p></section></div>)}</div><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلب المعاينة <CalendarDays size={18} /></button></div>
       </section>
 
-      <footer>
-        <div className="footer-brand"><b>الكموني</b><span>AUTOMOTIVE / CONCEPT SITE</span></div>
-        <p>تصميم مرجعي. الصور والمواصفات المنسوبة للمنتجات من مواقع العلامات الرسمية، والتحقق النهائي من المعرض مطلوب قبل النشر التجاري.</p>
-        <span>© 2026 / Designed for clarity</span>
-      </footer>
+      <section className="contact-section" id="contact">
+        <div className="contact-grid" data-reveal><div><p className="mono-tag accent">CONTACT / READY TO CHOOSE</p><h2>خلّي قرارك<br /><em>يبقى واضح.</em></h2><p>أرسل تفاصيل ما تبحث عنه. نموذج الاتصال جاهز للتوصيل بمنظومة واتساب أو CRM المعرض بعد اعتماد رقم التواصل.</p><div className="branch-chips"><span><CircleGauge size={15} /> المنصورة</span><span><CircleGauge size={15} /> طنطا</span></div></div><div className="contact-card"><span className="contact-card-index">KAM / 2026</span><h3>طلب اختيار سيارة</h3><p>الفئة، اللون، والتوفر النهائي تُراجع مع الفريق قبل التأكيد.</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>افتح النموذج <ArrowUpLeft size={19} /></button></div></div>
+      </section>
 
-      <Dialog open={Boolean(activeVehicle)} onOpenChange={(open) => !open && setActiveVehicle(null)}>
-        <DialogContent className="vehicle-dialog" dir="rtl">
-          {activeVehicle && <>
-            <DialogHeader>
-              <p className="eyebrow">{activeVehicle.scene} / {activeVehicle.sourceLabel}</p>
-              <DialogTitle>{activeVehicle.brand} {activeVehicle.name}</DialogTitle>
-              <DialogDescription>{activeVehicle.note}</DialogDescription>
-            </DialogHeader>
-            <div className="dialog-grid">
-              <div className="dialog-image"><img src={activeVehicle.image} alt={activeVehicle.alt} /></div>
-              <div>
-                <div className="price-line"><span>سعر بداية بالمصدر الرسمي</span><b>{activeVehicle.price}</b></div>
-                <div className="dialog-specs">
-                  {activeVehicle.specs.map((spec) => <div key={spec.label}><span>{spec.label}</span><b>{spec.value}</b></div>)}
-                </div>
-                <a className="source-button" href={activeVehicle.officialPage} target="_blank" rel="noreferrer">افتح صفحة المنتج الرسمية <ExternalLink size={16} /></a>
-              </div>
-            </div>
-          </>}
-        </DialogContent>
-      </Dialog>
+      <section className="provenance" data-reveal><div><ShieldCheck size={22} /><h3>صورة وبيان، بمصدر واضح.</h3></div><p>{activeCar.source}</p><span>آخر تحقق: 15 أغسطس 2026</span></section>
 
-      <Dialog open={isContactOpen} onOpenChange={setIsContactOpen}>
-        <DialogContent className="contact-dialog" dir="rtl">
-          <DialogHeader>
-            <p className="eyebrow">NEXT STEP / التوفر</p>
-            <DialogTitle>ثبّت المعلومات قبل القرار.</DialogTitle>
-            <DialogDescription>رقم الهاتف وواتساب وخريطة كل فرع تحتاج اعتماداً مباشراً من الكموني أوتوموتيف قبل نشرها. هذا الزر يوضح مسار التواصل ولا ينشئ طلباً وهمياً.</DialogDescription>
-          </DialogHeader>
-          <a className="source-button" href="https://www.instagram.com/elkamony.automotive/" target="_blank" rel="noreferrer">زيارة حساب المعرض <ExternalLink size={16} /></a>
-        </DialogContent>
-      </Dialog>
+      <footer><div className="footer-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></div><p>واجهة معرض سينمائية — كل الخطوات داخل الموقع. تظل بيانات الفروع ووسائل الاتصال الفعلية بحاجة إلى اعتماد إدارة المعرض قبل النشر التجاري.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
+
+      {viewerImage && <div className="image-viewer" role="dialog" aria-modal="true" aria-label="معاينة صورة السيارة"><button className="viewer-close" onClick={() => setViewerImage(null)} aria-label="إغلاق المعاينة"><X size={23} /></button><img src={viewerImage} alt="صورة رسمية مكبرة للطراز" /><p>لقطة رسمية مرجعية للطراز المختار</p></div>}
+
+      {bookingOpen && <div className="booking-overlay" role="dialog" aria-modal="true" aria-label="طلب معاينة"><div className="booking-modal"><button className="viewer-close" onClick={() => setBookingOpen(false)} aria-label="إغلاق النموذج"><X size={22} /></button>{formSent ? <div className="form-success"><span><Check size={35} /></span><p className="mono-tag accent">READY FOR CONNECTION</p><h2>تم تجهيز طلبك.</h2><p>في النسخة الحالية لا يتم إرسال البيانات خارج الموقع، حمايةً لخصوصيتك. اربط النموذج بواتساب أو CRM المعرض المعتمد لتفعيل الإرسال الفعلي.</p><button className="primary-button" onClick={() => setBookingOpen(false)}>فهمت <ChevronLeft size={18} /></button></div> : <><p className="mono-tag accent">BOOK A VISIT / STEP 01</p><h2>احجز طريقك<br />للمعاينة.</h2><p>اترك البيانات التي تساعد الفريق على تأكيد الفئة والفرع المناسبين.</p><form onSubmit={submitBooking}><label>الاسم<input required placeholder="اكتب اسمك" /></label><label>رقم الهاتف<input required inputMode="tel" placeholder="01X XXX XXXX" /></label><label>الطراز المهتم به<select defaultValue={activeCar.id}><option value="h6-hev">HAVAL H6 HEV</option><option value="tiggo-8">CHERY TIGGO 8 PRO MAX</option><option value="other">طراز آخر</option></select></label><label>الفرع الأنسب<select defaultValue="mansoura"><option value="mansoura">المنصورة</option><option value="tanta">طنطا</option><option value="not-sure">أحتاج مساعدة في الاختيار</option></select></label><button className="primary-button" type="submit">جهّز الطلب <ChevronLeft size={18} /></button></form></>}</div></div>}
     </main>
   );
 }
