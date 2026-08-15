@@ -30,9 +30,11 @@ type VehicleFilm = {
   reels: Reel[];
   modelSrc: string | null;
   spinFrames: string[];
+  spinLabel?: string;
+  spinHint?: string;
 };
 
-function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
+function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[]; alt: string; spinLabel: string; spinHint: string }) {
   const [frameIndex, setFrameIndex] = useState(0);
   const [loadedFrames, setLoadedFrames] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -44,8 +46,8 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
   const animationFrame = useRef<number | null>(null);
   const frameCount = frames.length;
   const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
-  // 36 لقطة رسمية تمثل دورة كاملة؛ اللفة الواحدة تحتاج سحباً مريحاً يقارب 288px.
-  const pixelsPerFrame = 8;
+  // تبقى اللفة الكاملة قريبة من 288px؛ تُباعد الزوايا القليلة حتى لا تدور السيارة بسرعة مضلّلة.
+  const pixelsPerFrame = frameCount >= 18 ? 8 : Math.max(32, Math.round(288 / frameCount));
 
   useEffect(() => {
     let cancelled = false;
@@ -141,8 +143,8 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
       }}
     >
       <img className="spin-frame" src={frames[frameIndex]} alt={alt} draggable={false} />
-      <div className="spin-hud" aria-hidden="true"><span>دوران كامل 360° / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
-      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : "اسحب لتدور السيارة"}</span></div>
+      <div className="spin-hud" aria-hidden="true"><span>{spinLabel}</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
+      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : spinHint}</span></div>
     </div>
   );
 }
@@ -155,10 +157,15 @@ const vehicles: Record<string, VehicleFilm> = {
     category: "SUV هجينة",
     routeCode: "KMN / H6 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
-    source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
+    source: "صور ومواصفات مرجعية من المادة الرسمية للطراز، ويشمل العارض ست زوايا خارجية رسمية. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
     modelSrc: null,
-    spinFrames: [],
+    spinFrames: [
+      "/manus-storage/haval-h6-hev-spin-01_89b2eb25.png", "/manus-storage/haval-h6-hev-spin-02_6976bce3.png", "/manus-storage/haval-h6-hev-spin-03_ccadf4f9.png",
+      "/manus-storage/haval-h6-hev-spin-04_968225b2.png", "/manus-storage/haval-h6-hev-spin-05_d0cb470d.png", "/manus-storage/haval-h6-hev-spin-06_d7c2ca05.png",
+    ],
+    spinLabel: "دوران 360° / 6 زوايا رسمية",
+    spinHint: "اسحب لاستكشاف الزوايا الست",
     specification: [
       { label: "الفئة", value: "SUV هجينة" },
       { label: "القوة", value: "240 حصان" },
@@ -195,6 +202,8 @@ const vehicles: Record<string, VehicleFilm> = {
       "/manus-storage/tiggo8pro-black-25_2513da0c.jpg", "/manus-storage/tiggo8pro-black-26_1319d4de.jpg", "/manus-storage/tiggo8pro-black-27_0cc1d481.jpg", "/manus-storage/tiggo8pro-black-28_04cba39c.jpg", "/manus-storage/tiggo8pro-black-29_c8903146.jpg", "/manus-storage/tiggo8pro-black-30_97f4039c.jpg",
       "/manus-storage/tiggo8pro-black-31_415dec5b.jpg", "/manus-storage/tiggo8pro-black-32_cc879c50.jpg", "/manus-storage/tiggo8pro-black-33_8318c542.jpg", "/manus-storage/tiggo8pro-black-34_177a8eb3.jpg", "/manus-storage/tiggo8pro-black-35_c9f26389.jpg", "/manus-storage/tiggo8pro-black-36_78806ae5.jpg",
     ],
+    spinLabel: "دوران 360° / 36 لقطة رسمية",
+    spinHint: "اسحب لتدور السيارة",
     specification: [
       { label: "الفئة", value: "SUV — 7 مقاعد" },
       { label: "القوة", value: "197 حصان" },
@@ -227,7 +236,7 @@ export default function VehicleExperience() {
   const [spinOpen, setSpinOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const hasInteractiveSpin = vehicle.spinFrames.length >= 18;
+  const hasInteractiveSpin = vehicle.spinFrames.length >= 6;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -290,7 +299,7 @@ export default function VehicleExperience() {
         </div>
       </section>
 
-      {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>دوران خارجي / 36 لقطة رسمية</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور Chery الرسمية`} /></div></div>}
+      {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>{vehicle.spinLabel}</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور رسمية`} spinLabel={vehicle.spinLabel ?? "دوران 360° / مصدر رسمي"} spinHint={vehicle.spinHint ?? "اسحب لتدور السيارة"} /></div></div>}
 
       <section className="spec-section" id="specs">
         <div className="spec-heading"><p>ملف الطراز / بيانات مرجعية</p><h2>المواصفات،<br />بعد المشهد.</h2></div>
