@@ -1,0 +1,267 @@
+/* Design reminder — رحلة بطاقات السينما: كل لقطة ورقة عرض كاملة داخل إطار مادي رفيع؛ السيارة أولاً، والنص يهمس من حافة المشهد فقط. */
+
+:root {
+  --film-card-inset: clamp(12px, 1.55vw, 26px);
+  --film-card-ink: #0d0d0c;
+  --film-card-paper: #f5f1e9;
+  --film-card-signal: #b33a2b;
+}
+
+/* غلاف الملف ورقي ودافئ؛ السواد يُحجز للمشاهد داخل كروت الرحلة. */
+.product-experience .product-intro {
+  background: var(--film-card-paper);
+  color: var(--film-card-ink);
+}
+
+.product-experience .product-intro-copy { background: var(--film-card-paper); }
+
+.product-experience .route-id,
+.product-experience .product-brand-line,
+.product-experience .product-category,
+.product-experience .product-intro-lead,
+.product-experience .product-price-note { color: #5d5a54; }
+
+.product-experience .product-intro-frame::after {
+  background: linear-gradient(90deg, rgba(23, 23, 21, .18), transparent 46%, rgba(23, 23, 21, .36));
+}
+
+/* تعاقب واضح بين اللقطات: بطاقة كبيرة واحدة في كل لحظة، بدلاً من صورة يعلوها عمود واجهة ثقيل. */
+.product-experience .film-section {
+  padding: var(--film-card-inset) 0;
+  background: var(--film-card-ink);
+}
+
+.product-experience .film-story.film-story-visual {
+  display: flex;
+  flex-direction: column;
+  gap: var(--film-card-inset);
+  padding-inline: var(--film-card-inset);
+  scroll-snap-type: y proximity;
+}
+
+.product-experience .film-story.film-story-visual .film-reel.film-reel-visual {
+  min-height: min(900px, calc(100svh - (var(--film-card-inset) * 2)));
+  height: calc(100svh - (var(--film-card-inset) * 2));
+  scroll-snap-align: center;
+  scroll-margin-top: var(--film-card-inset);
+  border: 1px solid rgba(245, 241, 233, .22);
+  background: #151513;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .28);
+}
+
+.product-experience .film-reel-visual .film-reel-image {
+  filter: saturate(.82) contrast(1.03) brightness(.82);
+  transform: scale(1.07);
+  transition: transform 1.25s cubic-bezier(.16, 1, .3, 1), filter .8s cubic-bezier(.16, 1, .3, 1), opacity .7s cubic-bezier(.16, 1, .3, 1);
+}
+
+.product-experience .film-reel-visual.is-active .film-reel-image {
+  filter: saturate(.96) contrast(1.04) brightness(.91);
+  transform: scale(1.008);
+}
+
+.product-experience .film-reel-visual .film-scrim {
+  background:
+    linear-gradient(180deg, rgba(8, 8, 7, .44) 0%, transparent 30%, transparent 57%, rgba(8, 8, 7, .76) 100%),
+    linear-gradient(90deg, rgba(8, 8, 7, .22) 0%, transparent 30%, transparent 70%, rgba(8, 8, 7, .34) 100%);
+}
+
+/* قاعدة تراثية عامة كانت تمنح كل div داخل البكرة عرض لوحة النص؛ تعاد هنا أبعاد طبقات المشهد الفعلية. */
+.product-experience .film-reel-visual > .film-scrim,
+.product-experience .film-reel-visual > .film-meta,
+.product-experience .film-reel-visual > .film-mode-switch,
+.product-experience .film-reel-visual > .frame-spin-viewer {
+  width: auto !important;
+}
+
+/* نتخلى عن شبكة الزوايا القديمة لتصبح حدود الكارت وحدها هي الإطار البصري. */
+.product-experience .film-reel-visual .film-corner {
+  display: none;
+}
+
+.product-experience .film-reel-visual .film-meta {
+  position: absolute;
+  z-index: 8;
+  top: clamp(18px, 2vw, 30px);
+  right: clamp(18px, 2.6vw, 44px);
+  left: clamp(18px, 2.6vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(245, 241, 233, .82);
+  font: 600 9px "IBM Plex Mono", monospace;
+  letter-spacing: .13em;
+  opacity: .5;
+  transform: translate3d(0, -8px, 0);
+  transition: opacity .48s cubic-bezier(.23, 1, .32, 1), transform .55s cubic-bezier(.23, 1, .32, 1);
+}
+
+.product-experience .film-reel-visual.is-active .film-meta {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* النص هنا تعليق سردي صغير في نهاية البطاقة، وليس بانل يقتطع ثلث الصورة. */
+.product-experience .film-reel-visual .film-overlay,
+.product-experience .film-reel-visual .film-overlay.right,
+.product-experience .film-reel-visual .film-overlay.left {
+  position: absolute;
+  z-index: 8;
+  right: clamp(20px, 4.5vw, 76px);
+  bottom: clamp(62px, 8.2vw, 112px);
+  left: auto;
+  width: min(430px, calc(100% - 40px));
+  display: grid !important;
+  gap: 8px;
+  padding: 0 !important;
+  color: var(--film-card-paper);
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  text-align: right;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, .86);
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition: opacity .62s cubic-bezier(.23, 1, .32, 1) .11s, transform .78s cubic-bezier(.16, 1, .3, 1) .11s;
+}
+
+.product-experience .film-reel-visual.left .film-overlay {
+  right: auto;
+  left: clamp(20px, 4.5vw, 76px);
+}
+
+.product-experience .film-reel-visual.is-active .film-overlay {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.product-experience .film-reel-visual .film-overlay > p {
+  gap: 8px;
+  margin: 0 0 2px;
+  color: rgba(245, 241, 233, .86);
+  font-size: 9px;
+}
+
+.product-experience .film-reel-visual .film-overlay > p span { color: #dd6b5e; }
+.product-experience .film-reel-visual .film-overlay > p i { width: 5px; height: 5px; background: var(--film-card-signal); border-radius: 0; }
+
+.product-experience .film-reel-visual .film-overlay h2 {
+  max-width: 12ch;
+  margin: 0;
+  font: 900 clamp(2rem, 3.2vw, 3.35rem) / .99 Tajawal, sans-serif;
+  letter-spacing: -.05em;
+  text-wrap: balance;
+}
+
+.product-experience .film-reel-visual .film-overlay > span {
+  max-width: 42ch;
+  margin-top: 3px;
+  color: rgba(245, 241, 233, .86);
+  font-size: 12px;
+  line-height: 1.82;
+}
+
+.product-experience .film-reel-visual .film-decision {
+  width: fit-content;
+  margin-top: 5px;
+  padding-top: 7px;
+  color: rgba(245, 241, 233, .72);
+  border-top: 1px solid rgba(245, 241, 233, .42);
+  font-size: 8px;
+}
+
+/* مؤشر الطريق يبقى خفيفاً في قاعدة الكارت ولا ينافس السرد أو السيارة. */
+.product-experience .film-reel-visual .film-route {
+  right: 50%;
+  bottom: clamp(20px, 2.2vw, 30px);
+  left: auto;
+  width: min(245px, 34vw) !important;
+  transform: translateX(50%);
+}
+
+.product-experience .film-reel-visual .film-route button {
+  width: 22px;
+  height: 22px;
+  font-size: 7px;
+}
+
+.product-experience .film-reel-visual .film-mode-switch {
+  top: clamp(48px, 6vw, 84px);
+  right: auto !important;
+  bottom: auto !important;
+  left: clamp(18px, 2.6vw, 44px);
+  z-index: 9;
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  width: max-content !important;
+  height: auto !important;
+  padding: 3px;
+  background: rgba(13, 13, 12, .78);
+  border: 1px solid rgba(245, 241, 233, .28);
+  backdrop-filter: blur(8px);
+  writing-mode: horizontal-tb;
+  white-space: nowrap;
+}
+
+.product-experience .film-reel-visual .film-mode-switch button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: max-content !important;
+  min-height: 32px;
+  padding: 8px 9px;
+  color: rgba(245, 241, 233, .78);
+  background: transparent;
+  font-size: 9px;
+}
+
+.product-experience .film-reel-visual .film-mode-switch button.active {
+  color: var(--film-card-paper);
+  background: var(--film-card-signal);
+}
+
+/* عارض Tiggo يستبدل الصورة داخل نفس الكارت تماماً عند اختياره. */
+.product-experience .film-reel-visual .frame-spin-viewer {
+  z-index: 3;
+  inset: 0;
+  background: #e7e2d7;
+}
+
+.product-experience .film-reel-visual .frame-spin-viewer::after { inset: 0; }
+.product-experience .film-reel-visual .frame-spin-viewer .spin-drag-hint { bottom: clamp(62px, 8.2vw, 112px); }
+
+@media (max-width: 820px) {
+  .product-experience .film-section { padding: 9px 0; }
+  .product-experience .product-intro-frame::after { background: linear-gradient(0deg, rgba(23, 23, 21, .74), transparent 48%); }
+  .product-experience .film-story.film-story-visual { gap: 9px; padding-inline: 9px; }
+  .product-experience .film-story.film-story-visual .film-reel.film-reel-visual {
+    min-height: 86svh;
+    height: 86svh;
+  }
+  .product-experience .film-reel-visual .film-reel-image { object-position: center; }
+  .product-experience .film-reel-visual .film-meta { top: 16px; right: 16px; left: 16px; font-size: 7px; }
+  .product-experience .film-reel-visual .film-meta span:nth-child(2) { display: none; }
+  .product-experience .film-reel-visual .film-overlay,
+  .product-experience .film-reel-visual .film-overlay.right,
+  .product-experience .film-reel-visual .film-overlay.left {
+    right: 18px;
+    bottom: 74px;
+    left: 18px;
+    width: auto;
+  }
+  .product-experience .film-reel-visual .film-overlay h2 { max-width: 11ch; font-size: clamp(1.75rem, 8.6vw, 2.55rem); }
+  .product-experience .film-reel-visual .film-overlay > span { max-width: 33ch; font-size: .75rem; line-height: 1.7; }
+  .product-experience .film-reel-visual .film-overlay > p { font-size: 8px; }
+  .product-experience .film-reel-visual .film-decision { font-size: 7px; }
+  .product-experience .film-reel-visual .film-route { bottom: 19px; width: min(210px, 58vw) !important; }
+  .product-experience .film-reel-visual .film-route button { width: 20px; height: 20px; font-size: 6px; }
+  .product-experience .film-reel-visual .film-mode-switch { top: 44px; left: 14px; }
+  .product-experience .film-reel-visual .film-mode-switch button { padding: 7px; font-size: 8px; }
+  .product-experience .film-reel-visual .frame-spin-viewer .spin-drag-hint { bottom: 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-experience .film-reel-visual .film-reel-image,
+  .product-experience .film-reel-visual .film-overlay,
+  .product-experience .film-reel-visual .film-meta { transition: none; }
+}

@@ -1,6 +1,6 @@
 /**
  * Design reminder — دفتر طريق المدينة:
- * صفحة طراز تحريريّة تقودها التمريرة. ورق حجري/حبر/أحمر إشاري فقط؛ الصورة الرسمية هي البطل.
+ * صفحة طراز تحريريّة تقودها التمريرة. كل لقطة بطاقة سينمائية كاملة الشاشة؛ الصورة الرسمية هي البطل والنص تعليق مقتصد لا يحجبها.
  * لا يُعرض وضع 360° حقيقياً إلا عند وجود أصل GLB/GLTF أو تسلسل دوران مرخّص.
  */
 import { createElement, useEffect, useMemo, useRef, useState } from "react";
@@ -96,7 +96,7 @@ const vehicles: Record<string, VehicleFilm> = {
     ],
     reels: [
       { code: "REEL 01", eyebrow: "الوصول", title: "قبل ما تقترب، خُد ثانية تشوف الخط كله.", copy: "نبدأ من مسافة كافية: المقدمة، الوقفة، وكيف يلتقط الهيكل الضوء قبل أن تدخل في التفاصيل.", image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg", alignment: "right", fact: "HYBRID / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الواجهة", title: "التفاصيل الكبيرة لا تحتاج صوتاً عالياً.", copy: "لقطة أقرب للواجهة والتوقيع الضوئي؛ ليست قائمة مواصفات، بل بداية لغة التصميم التي تراها في الطريق.", image: "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg", alignment: "left", fact: "FRONT / EXTERIOR" },
+      { code: "REEL 02", eyebrow: "الواجهة", title: "الضوء يكشف الخطوط من غير ضجيج.", copy: "لقطة للواجهة والسقف والتوقيع الضوئي؛ ننتقل من الوقفة الكاملة إلى ملمس التصميم من غير تكرار صورة الوصول.", image: "/manus-storage/haval-h6-light-roof_017bed29.jpg", alignment: "left", fact: "FRONT / LIGHT DETAIL" },
       { code: "REEL 03", eyebrow: "الخط الجانبي", title: "امشِ حولها — الخطوط تتغير معك.", copy: "يأخذ التمرير مكان حركة المصور: من امتداد الجسم إلى تفصيل المرآة والعجلة، من غير أن يغطي السيارة بعناصر واجهة.", image: "/manus-storage/haval-h6-wheel-mirror_99bc238f.jpg", alignment: "right", fact: "SIDE / MATERIAL DETAIL" },
       { code: "REEL 04", eyebrow: "المقصورة", title: "الانتقال للداخل مقصود، مش مجرد صورة تانية.", copy: "بعد جسم السيارة يأتي مكانك الحقيقي فيها. الخط الفاصل بين الخارج والداخل يُقرأ كقطع سينمائي واحد.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", fact: "CABIN / WIDE ANGLE" },
       { code: "REEL 05", eyebrow: "القيادة", title: "عند المقود، الكلام يبقى أوضح.", copy: "الشاشة، عناصر التحكم، ومشهد الأداء. هنا تنتهي الرحلة الرقمية وتبدأ خطوة المعاينة الفعلية مع المعرض.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
@@ -240,7 +240,7 @@ export default function VehicleExperience() {
 
       <section className="film-section" id="film" ref={filmRef}>
         <div className="film-story film-story-visual">
-          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel film-reel-visual ${reel.alignment}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}>
+          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel film-reel-visual ${reel.alignment} ${index === activeReel ? "is-active" : ""}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}>
             <img className="film-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
             {index === 0 && hasInteractiveSpin && viewerMode === "spin" && viewer}
             <div className="film-scrim" aria-hidden="true" />
