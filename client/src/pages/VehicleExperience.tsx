@@ -95,11 +95,11 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الوصول", title: "قبل ما تقترب، خُد ثانية تشوف الخط كله.", copy: "نبدأ من مسافة كافية: المقدمة، الوقفة، وكيف يلتقط الهيكل الضوء قبل أن تدخل في التفاصيل.", image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg", alignment: "right", fact: "HYBRID / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الواجهة", title: "الضوء يكشف الخطوط من غير ضجيج.", copy: "لقطة للواجهة والسقف والتوقيع الضوئي؛ ننتقل من الوقفة الكاملة إلى ملمس التصميم من غير تكرار صورة الوصول.", image: "/manus-storage/haval-h6-light-roof_017bed29.jpg", alignment: "left", fact: "FRONT / LIGHT DETAIL" },
-      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "امشِ حولها — الخطوط تتغير معك.", copy: "يأخذ التمرير مكان حركة المصور: من امتداد الجسم إلى تفصيل المرآة والعجلة، من غير أن يغطي السيارة بعناصر واجهة.", image: "/manus-storage/haval-h6-wheel-mirror_99bc238f.jpg", alignment: "right", fact: "SIDE / MATERIAL DETAIL" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "الانتقال للداخل مقصود، مش مجرد صورة تانية.", copy: "بعد جسم السيارة يأتي مكانك الحقيقي فيها. الخط الفاصل بين الخارج والداخل يُقرأ كقطع سينمائي واحد.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", fact: "CABIN / WIDE ANGLE" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "عند المقود، الكلام يبقى أوضح.", copy: "الشاشة، عناصر التحكم، ومشهد الأداء. هنا تنتهي الرحلة الرقمية وتبدأ خطوة المعاينة الفعلية مع المعرض.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
+      { code: "REEL 01", eyebrow: "الوصول", title: "قبل الاقتراب، شوف الخط كله.", copy: "المقدمة والوقفة وكيف يلتقط الهيكل الضوء؛ نقطة بداية هادئة قبل التفاصيل.", image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg", alignment: "right", fact: "HYBRID / REFERENCE MODEL" },
+      { code: "REEL 02", eyebrow: "الواجهة", title: "الضوء يكشف الخطوط بلا ضجيج.", copy: "واجهة وسقف وتوقيع ضوئي؛ انتقال من الوقفة الكاملة إلى ملمس التصميم.", image: "/manus-storage/haval-h6-light-roof_017bed29.jpg", alignment: "left", fact: "FRONT / LIGHT DETAIL" },
+      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "امشِ حولها؛ الخطوط تتغير.", copy: "امتداد الجسم وتفصيل المرآة والعجلة، من دون عناصر تُغطي الصورة.", image: "/manus-storage/haval-h6-wheel-mirror_99bc238f.jpg", alignment: "right", fact: "SIDE / MATERIAL DETAIL" },
+      { code: "REEL 04", eyebrow: "المقصورة", title: "من الخارج للداخل، اللقطة مقصودة.", copy: "شاشة ومقود ومساحة تُقرأ بهدوء؛ قطع واحد بين طريق السيارة ومكانك فيها.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", fact: "CABIN / WIDE ANGLE" },
+      { code: "REEL 05", eyebrow: "القيادة", title: "عند المقود، كل شيء أوضح.", copy: "الشاشة وعناصر التحكم قبل أن تبدأ خطوتك الفعلية للمعاينة.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
     ],
   },
   "tiggo-8": {
@@ -107,7 +107,7 @@ const vehicles: Record<string, VehicleFilm> = {
     brand: "CHERY",
     name: "Tiggo 8 Pro Max",
     category: "SUV — 7 مقاعد",
-    routeCode: "KMN / T8 / REEL-02",
+    routeCode: "KMN / T8 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
@@ -131,11 +131,11 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الوصول", title: "حضور واسع يبدأ من أول وقفة.", copy: "نأخذ اللقطة الأولى بهدوء كي ترى التكوين كاملاً قبل تفكيكه إلى قرارات تصميم أصغر.", image: "/manus-storage/chery-t8-banner_72ed49f7.jpg", alignment: "right", fact: "7 SEATS / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الواجهة", title: "واجهة مرسومة لتصل قبلك.", copy: "الشبك والتوقيع الأمامي ليسا زخرفة؛ هما نقطة البداية للكتلة الكبيرة التي تمتد على كامل الجسم.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", alignment: "left", fact: "FRONT / EXTERIOR" },
-      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "المساحة لها شكل قبل أن يكون لها رقم.", copy: "تتابع جانبي يكشف الامتداد والنسب، ثم يترك التفاصيل الصغيرة للصورة بدلاً من الادعاء بتصوير ثلاثي الأبعاد.", image: "/manus-storage/chery-t8-exterior-side_8d0a9686.jpg", alignment: "right", fact: "SIDE / PROPORTION" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "مكان أطول للمشوار كله.", copy: "لقطة الداخل تأتي بعد أن تتعرف على الجسم، فتفهم مساحة الصفوف ولغة المقصورة في سياقها الطبيعي.", image: "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg", alignment: "left", fact: "CABIN / INTERIOR" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "كل شيء أمامك لما يحين وقت الطريق.", copy: "نختم عند لوحة القيادة: مشهد مكثف للواجهة التقنية قبل أن تختار موعد معاينتك وتتحقق من الفئة المتاحة.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
+      { code: "REEL 01", eyebrow: "الوصول", title: "حضور واسع من أول وقفة.", copy: "لقطة هادئة للتكوين كاملاً قبل أن نقترب من تفاصيله.", image: "/manus-storage/chery-t8-banner_72ed49f7.jpg", alignment: "right", fact: "7 SEATS / REFERENCE MODEL" },
+      { code: "REEL 02", eyebrow: "الواجهة", title: "واجهة تصل قبلك.", copy: "الشبك والتوقيع الأمامي نقطة بداية للكتلة التي تمتد على كامل الجسم.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", alignment: "left", fact: "FRONT / EXTERIOR" },
+      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "المساحة لها شكل قبل الرقم.", copy: "امتداد ونِسَب تترك للصورة مهمة كشف التفاصيل الصغيرة.", image: "/manus-storage/chery-t8-exterior-side_8d0a9686.jpg", alignment: "right", fact: "SIDE / PROPORTION" },
+      { code: "REEL 04", eyebrow: "المقصورة", title: "مكان أطول للمشوار كله.", copy: "بعد أن تقرأ الجسم، تأتي المقصورة لتفهم مساحة الصفوف ولغتها.", image: "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg", alignment: "left", fact: "CABIN / INTERIOR" },
+      { code: "REEL 05", eyebrow: "القيادة", title: "كل شيء أمامك للطريق.", copy: "نختم عند لوحة القيادة قبل أن تختار موعد معاينتك.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
     ],
   },
 };
@@ -231,7 +231,7 @@ export default function VehicleExperience() {
           <p className="product-brand-line">{vehicle.brand}</p>
           <h1>{vehicle.name}</h1>
           <p className="product-category">{vehicle.category}</p>
-          <p className="product-intro-lead">خمس لقطات رسمية مرتبة كرحلة واحدة: وصول، تصميم، خط جانبي، مقصورة، ثم قرار المعاينة. مرّر بهدوء وخذ كل لقطة في وقتها.</p>
+          <p className="product-intro-lead">خمس لقطات رسمية؛ من الوصول إلى المقصورة، ثم قرار المعاينة.</p>
           <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ الاستكشاف <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> استكشف 360°</button>}</div>
           <p className="product-price-note">{vehicle.price}</p>
         </div>
@@ -239,7 +239,7 @@ export default function VehicleExperience() {
       </section>
 
       <section className="film-section film-section-continuous" id="film" ref={filmRef} style={{ "--reel-count": vehicle.reels.length, "--film-travel-height": `${vehicle.reels.length * 100}svh` } as React.CSSProperties}>
-        <div className="continuous-film-stage" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
+        <div className={`continuous-film-stage copy-${active.alignment} reel-${activeReel + 1}`} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
           {viewer}
           <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
           <div className="film-meta continuous-film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
