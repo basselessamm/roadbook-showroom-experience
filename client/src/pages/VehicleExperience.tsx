@@ -258,7 +258,7 @@ export default function VehicleExperience() {
       (entries) => entries.forEach((entry) => {
         if (entry.isIntersecting) setActiveReel(Number((entry.target as HTMLElement).dataset.reelIndex));
       }),
-      { rootMargin: "-40% 0px -42% 0px", threshold: 0.02 },
+      { rootMargin: "-24% 0px -32% 0px", threshold: 0.06 },
     );
     document.querySelectorAll<HTMLElement>("[data-reel-index]").forEach((reel) => observer.observe(reel));
     return () => observer.disconnect();
@@ -297,7 +297,7 @@ export default function VehicleExperience() {
       <section className="film-section film-section-continuous" id="film" style={{ "--reel-count": vehicle.reels.length } as React.CSSProperties} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
         <div className="continuous-film-triggers">
           {vehicle.reels.map((reel, index) => (
-            <article id={`reel-${index}`} data-reel-index={index} className={`continuous-film-trigger copy-${reel.alignment}${index === activeReel ? " is-active" : ""}`} key={reel.code}>
+            <article id={`reel-${index}`} data-reel-index={index} style={{ "--reel-layer": index + 1 } as React.CSSProperties} className={`continuous-film-trigger copy-${reel.alignment}${index === activeReel ? " is-active" : ""}`} key={reel.code}>
               <img className="continuous-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
               <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
               <div className="film-meta continuous-film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
