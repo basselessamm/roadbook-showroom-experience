@@ -3,8 +3,8 @@
  * صفحة طراز تحريريّة تقودها التمريرة. كل لقطة بطاقة سينمائية كاملة الشاشة؛ الصورة الرسمية هي البطل والنص تعليق مقتصد لا يحجبها.
  * لا يُعرض وضع 360° حقيقياً إلا عند وجود أصل GLB/GLTF أو تسلسل دوران مرخّص.
  */
-import { createElement, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpLeft, CircleDot, Gauge, Menu, MoveLeft, Rotate3D, SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowUpLeft, CircleDot, Gauge, Menu, MoveLeft, Rotate3D, X } from "lucide-react";
 import { Link, useParams } from "wouter";
 
 type Reel = {
@@ -224,23 +224,12 @@ export default function VehicleExperience() {
   const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
   const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
   const [activeReel, setActiveReel] = useState(0);
-  const [viewerMode, setViewerMode] = useState<"film" | "spin">("film");
+  const [spinOpen, setSpinOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [routeProgress, setRouteProgress] = useState(0);
-  const filmRef = useRef<HTMLElement | null>(null);
 
-  const active = vehicle.reels[activeReel];
-  const hasInteractiveSpin = vehicle.spinFrames.length >= 18 || Boolean(vehicle.modelSrc);
+  const hasInteractiveSpin = vehicle.spinFrames.length >= 18;
 
   useEffect(() => {
-    const updateProgress = () => {
-      const film = filmRef.current;
-      if (!film) return;
-      const rect = film.getBoundingClientRect();
-      const distance = Math.max(film.offsetHeight - window.innerHeight, 1);
-      const progress = Math.min(1, Math.max(0, -rect.top / distance));
-      setRouteProgress(progress);
-    };
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((entry) => {
         if (entry.isIntersecting) setActiveReel(Number((entry.target as HTMLElement).dataset.reelIndex));
@@ -248,45 +237,13 @@ export default function VehicleExperience() {
       { rootMargin: "-40% 0px -42% 0px", threshold: 0.02 },
     );
     document.querySelectorAll<HTMLElement>("[data-reel-index]").forEach((reel) => observer.observe(reel));
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    updateProgress();
-    return () => { observer.disconnect(); window.removeEventListener("scroll", updateProgress); };
+    return () => observer.disconnect();
   }, [vehicle.slug]);
 
   useEffect(() => {
     setActiveReel(0);
-    setViewerMode("film");
+    setSpinOpen(false);
   }, [vehicle.slug]);
-
-  useEffect(() => {
-    if (!vehicle.modelSrc) return;
-    void import("@google/model-viewer");
-  }, [vehicle.modelSrc]);
-
-  const viewer = useMemo(() => {
-    if (viewerMode === "film") {
-      return vehicle.reels.map((reel, index) => (
-        <img key={reel.code} className={index === activeReel ? "film-image active" : "film-image"} src={reel.image} alt={index === activeReel ? `${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية` : ""} />
-      ));
-    }
-    if (vehicle.spinFrames.length >= 18) {
-      return <FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور Chery الرسمية`} />;
-    }
-    if (vehicle.modelSrc) {
-      return createElement("model-viewer", {
-        className: "licensed-model-viewer",
-        src: vehicle.modelSrc,
-        poster: vehicle.hero,
-        alt: `${vehicle.brand} ${vehicle.name} — عارض ثلاثي الأبعاد مرخّص`,
-        "camera-controls": true,
-        "auto-rotate": true,
-        "shadow-intensity": "1",
-        "environment-image": "neutral",
-        "touch-action": "pan-y",
-      });
-    }
-    return null;
-  }, [activeReel, vehicle, viewerMode]);
 
   return (
     <main className="product-experience" dir="rtl">
@@ -307,28 +264,33 @@ export default function VehicleExperience() {
           <h1>{vehicle.name}</h1>
           <p className="product-category">{vehicle.category}</p>
           <p className="product-intro-lead">خمس لقطات رسمية؛ من الوصول إلى المقصورة، ثم قرار المعاينة.</p>
-          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ الاستكشاف <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> استكشف 360°</button>}</div>
+          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ الاستكشاف <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => setSpinOpen(true)}><Rotate3D size={17} /> استكشف 360°</button>}</div>
           <p className="product-price-note">{vehicle.price}</p>
         </div>
         <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
       </section>
 
-      <section className="film-section film-section-continuous" id="film" ref={filmRef} style={{ "--reel-count": vehicle.reels.length, "--film-travel-height": `${vehicle.reels.length * 100}svh` } as React.CSSProperties}>
-        <div className={`continuous-film-stage copy-${active.alignment} reel-${activeReel + 1}`} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
-          {viewer}
-          <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
-          <div className="film-meta continuous-film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-          <div className={`film-overlay continuous-film-overlay ${active.alignment}`}>
-            <p><span>{active.eyebrow}</span><i aria-hidden="true" /> لقطة {String(activeReel + 1).padStart(2, "0")}</p>
-            <h2>{active.title}</h2>
-            <span>{active.copy}</span>
-            <small className="film-decision">مرحلة {String(activeReel + 1).padStart(2, "0")} من {String(vehicle.reels.length).padStart(2, "0")} — {active.fact}</small>
-          </div>
-          {hasInteractiveSpin && <div className="film-mode-switch continuous-film-mode" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>}
-          <div className="film-route continuous-film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${Math.max(.04, routeProgress)})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+      <section className="film-section film-section-continuous" id="film" style={{ "--reel-count": vehicle.reels.length } as React.CSSProperties} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
+        <div className="continuous-film-triggers">
+          {vehicle.reels.map((reel, index) => (
+            <article id={`reel-${index}`} data-reel-index={index} className={`continuous-film-trigger copy-${reel.alignment}${index === activeReel ? " is-active" : ""}`} key={reel.code}>
+              <img className="continuous-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
+              <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
+              <div className="film-meta continuous-film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+              <div className={`film-overlay continuous-film-overlay ${reel.alignment}`}>
+                <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> سجلّ اللقطة</p>
+                <h2>{reel.title}</h2>
+                <span>{reel.copy}</span>
+                <small className="film-decision">مؤشر قرار / {reel.fact}</small>
+              </div>
+              {hasInteractiveSpin && index === 0 && <button className="reel-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
+              <div className="film-route continuous-film-route" aria-label={`تنقل بكرات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(index + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+            </article>
+          ))}
         </div>
-        <div className="continuous-film-triggers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} data-reel-index={index} className="continuous-film-trigger" key={reel.code} />)}</div>
       </section>
+
+      {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>دوران خارجي / 36 لقطة رسمية</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور Chery الرسمية`} /></div></div>}
 
       <section className="spec-section" id="specs">
         <div className="spec-heading"><p>ملف الطراز / بيانات مرجعية</p><h2>المواصفات،<br />بعد المشهد.</h2></div>
