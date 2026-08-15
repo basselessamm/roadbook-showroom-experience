@@ -138,7 +138,8 @@ html body .site-shell .top-model-controls button { display: grid; place-items: c
 html body .site-shell .top-model-controls button:last-child svg { transform: rotate(180deg); }
 html body .site-shell .top-model-controls button:hover { border-color: #b33a2b; background: #b33a2b; }
 html body .site-shell .top-model-controls span { min-width:40px; color:#f4efe5; text-align:center; }
-html body .site-shell .top-model-carousel { position: relative; width: 100%; min-height: min(780px, 74svh); overflow: hidden; outline: none; }
+html body .site-shell .top-model-carousel { position: relative; width: 100%; min-height: min(780px, 74svh); overflow: hidden; outline: none; cursor: grab; touch-action: pan-y; user-select: none; }
+html body .site-shell .top-model-carousel.is-dragging { cursor: grabbing; }
 html body .site-shell .top-model-carousel-track { position: relative; width: 100%; min-height: min(780px, 74svh); direction: ltr; }
 html body .site-shell .top-model-banner { position: absolute; inset: 0; width: 100%; min-height: min(780px, 74svh); overflow: hidden; padding: 0; color: #fffaf1; border: 0; background: #11110f; cursor: pointer; text-align: right; direction: rtl; opacity: 0; pointer-events: none; transform: scale(1.018); transition: opacity 1050ms cubic-bezier(.22,1,.36,1), transform 1250ms cubic-bezier(.22,1,.36,1); }
 html body .site-shell .top-model-banner.is-active { z-index: 1; opacity: 1; pointer-events: auto; transform: scale(1); }

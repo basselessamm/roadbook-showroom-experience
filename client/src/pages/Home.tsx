@@ -3,7 +3,7 @@
  * السيارة هي بطلة المشهد؛ البانر الكامل هو بوابة كل ملف، وورق حجري/حبر/أحمر إشاري بدل الوهج التقني.
  * البحث والمقارنة يوصلان إلى قرار واضح؛ الصور الرسمية وحدها تقود المشهد ولا ندّعي مخزوناً حياً أو عارضاً غير موثق.
  */
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, PointerEvent, WheelEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpLeft,
@@ -174,9 +174,12 @@ export default function Home() {
   const [formSent, setFormSent] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [modelCarouselIndex, setModelCarouselIndex] = useState(0);
-  const [isModelCarouselPaused, setIsModelCarouselPaused] = useState(false);
+  const [isModelCarouselDragging, setIsModelCarouselDragging] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const modelCarouselPointer = useRef<{ x: number; y: number } | null>(null);
+  const modelCarouselDragged = useRef(false);
+  const modelCarouselWheelLocked = useRef(false);
   const activeCar = cars[0];
   const searchResults = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase("ar");
@@ -199,14 +202,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (isModelCarouselPaused) return;
-    const timer = window.setInterval(() => {
-      setModelCarouselIndex((current) => (current + 1) % cars.length);
-    }, 6500);
-    return () => window.clearInterval(timer);
-  }, [isModelCarouselPaused]);
-
-  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -224,6 +219,37 @@ export default function Home() {
 
   const moveModelBanner = (direction: number) => {
     setModelCarouselIndex((current) => (current + direction + cars.length) % cars.length);
+  };
+
+  const handleModelPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    modelCarouselPointer.current = { x: event.clientX, y: event.clientY };
+    modelCarouselDragged.current = false;
+    setIsModelCarouselDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleModelPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const start = modelCarouselPointer.current;
+    if (!start) return;
+    if (Math.abs(event.clientX - start.x) > 12) modelCarouselDragged.current = true;
+  };
+
+  const handleModelPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = modelCarouselPointer.current;
+    modelCarouselPointer.current = null;
+    setIsModelCarouselDragging(false);
+    if (!start) return;
+    const horizontal = event.clientX - start.x;
+    const vertical = event.clientY - start.y;
+    if (Math.abs(horizontal) > 48 && Math.abs(horizontal) > Math.abs(vertical)) moveModelBanner(horizontal < 0 ? 1 : -1);
+  };
+
+  const handleModelWheel = (event: WheelEvent<HTMLDivElement>) => {
+    if (Math.abs(event.deltaX) < 18 || Math.abs(event.deltaX) <= Math.abs(event.deltaY) || modelCarouselWheelLocked.current) return;
+    event.preventDefault();
+    modelCarouselWheelLocked.current = true;
+    moveModelBanner(event.deltaX > 0 ? 1 : -1);
+    window.setTimeout(() => { modelCarouselWheelLocked.current = false; }, 650);
   };
 
   const openModelFromSearch = (car: Car) => {
@@ -258,10 +284,9 @@ export default function Home() {
       </header>
 
       <section className="top-model-strip" aria-label="طرازات المعرض المرجعية">
-        <div className="top-model-strip-head"><div className="top-model-controls"><button onClick={() => moveModelBanner(-1)} aria-label="البانر السابق"><ChevronLeft size={17} /></button><span>{String(modelCarouselIndex + 1).padStart(2, "0")} / {String(cars.length).padStart(2, "0")}</span><button onClick={() => moveModelBanner(1)} aria-label="البانر التالي"><ChevronLeft size={17} /></button></div></div>
-        <div className="top-model-carousel" onMouseEnter={() => setIsModelCarouselPaused(true)} onMouseLeave={() => setIsModelCarouselPaused(false)} onFocus={() => setIsModelCarouselPaused(true)} onBlur={() => setIsModelCarouselPaused(false)}>
+        <div className={`top-model-carousel ${isModelCarouselDragging ? "is-dragging" : ""}`} onPointerDown={handleModelPointerDown} onPointerMove={handleModelPointerMove} onPointerUp={handleModelPointerUp} onPointerCancel={() => { modelCarouselPointer.current = null; setIsModelCarouselDragging(false); }} onWheel={handleModelWheel}>
           <div className="top-model-carousel-track">
-          {cars.map((car, index) => <button className={`top-model-banner ${car.color} ${index === modelCarouselIndex ? "is-active" : ""}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`} aria-hidden={index !== modelCarouselIndex} tabIndex={index === modelCarouselIndex ? 0 : -1}>
+          {cars.map((car, index) => <button className={`top-model-banner ${car.color} ${index === modelCarouselIndex ? "is-active" : ""}`} key={car.id} onClick={(event) => { if (modelCarouselDragged.current) { event.preventDefault(); modelCarouselDragged.current = false; return; } setLocation(`/cars/${car.id}`); }} aria-label={`فتح ملف ${car.brand} ${car.name}`} aria-hidden={index !== modelCarouselIndex} tabIndex={index === modelCarouselIndex ? 0 : -1}>
             <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
             <span className="top-model-banner-scrim" aria-hidden="true" />
             <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em><span className="top-model-banner-stats">{car.stats.slice(0, 2).map((stat) => <span key={stat.label}><i>{stat.label}</i>{stat.value}</span>)}</span></span>
