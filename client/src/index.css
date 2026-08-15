@@ -3,6 +3,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./vehicle-overrides.css";
+@import "./inventory.css";
+@import "./roadbook-final.css";
 @custom-variant dark (&:is(.dark *));
 @theme inline { --radius: 1rem; --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); }
 :root { --background: oklch(.12 .012 260); --foreground: oklch(.96 .006 90); --card: oklch(.17 .02 260); --card-foreground: oklch(.96 .006 90); --popover: oklch(.16 .02 260); --popover-foreground: oklch(.96 .006 90); --primary: oklch(.69 .13 62); --primary-foreground: oklch(.13 .01 260); --secondary: oklch(.22 .018 260); --secondary-foreground: oklch(.94 .006 90); --muted: oklch(.25 .017 260); --muted-foreground: oklch(.69 .02 240); --accent: oklch(.76 .105 220); --accent-foreground: oklch(.12 .012 260); --border: oklch(.94 .01 90 / 14%); --input: oklch(.94 .01 90 / 14%); --ring: oklch(.76 .105 220); --ease-out: cubic-bezier(.23,1,.32,1); }

@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   CircleGauge,
   Crosshair,
+  Handshake,
   Menu,
   MousePointer2,
   MoveRight,
@@ -23,6 +24,7 @@ import {
   Rewind,
   Rotate3D,
   ShieldCheck,
+  Sparkles,
   X,
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -132,6 +134,14 @@ const serviceSteps = [
   ["01", "اختر المشهد", "قارن الموديلات واقرأ المواصفات داخل موقع المعرض."],
   ["02", "ثبّت التوفر", "أرسل طلبك، ثم أكد الفئة واللون مع الفريق قبل الحجز."],
   ["03", "عاين بهدوء", "اختر الفرع الأنسب وحدد موعداً عندما تتوفر بياناته المعتمدة."],
+];
+
+// خدمات قابلة للتفعيل بعد اعتماد سياسات المعرض؛ لا تتضمن ادعاءات تمويل أو ضمان غير مؤكدة.
+const dealershipServices = [
+  { icon: CircleGauge, number: "01", title: "التمويل", copy: "ابدأ سؤالاً منظماً عن حلول التمويل المناسبة بعد تأكيد الفئة." },
+  { icon: Handshake, number: "02", title: "الاستبدال", copy: "شارك بيانات سيارتك الحالية لتبدأ مناقشة تقييم مبدئية مع الفريق." },
+  { icon: ShieldCheck, number: "03", title: "الضمان", copy: "راجع نطاق الضمان المعتمد للطراز والفئة قبل تثبيت قرارك." },
+  { icon: Sparkles, number: "04", title: "الكونسيرج", copy: "ننسق معاينتك بين المنصورة وطنطا فور اعتماد جهة التواصل." },
 ];
 
 function scrollToSection(id: string) {
@@ -262,6 +272,7 @@ export default function Home() {
         </a>
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح القائمة">{menuOpen ? <X size={22} /> : <Menu size={23} />}</button>
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
+          <button onClick={() => { setLocation("/inventory"); setMenuOpen(false); }}>المخزون</button>
           <button onClick={() => { scrollToSection("fleet"); setMenuOpen(false); }}>الأسطول</button>
           <button onClick={() => { scrollToSection("studio"); setMenuOpen(false); }}>رحلة الكاميرا</button>
           <button onClick={() => { scrollToSection("experience"); setMenuOpen(false); }}>تجربتك</button>
@@ -278,7 +289,7 @@ export default function Home() {
           <h1>المشوار الكبير<br /><em>يبدأ من نظرة.</em></h1>
           <p className="hero-lead">كل ما تحتاجه للاستكشاف داخل موقع الكموني أوتوموتيف: موديلات مرجعية، تفاصيل دقيقة، وحجز معاينة في تجربة واحدة.</p>
           <div className="hero-actions">
-            <button className="primary-button" onClick={() => scrollToSection("fleet")}>استكشف السيارات <ChevronLeft size={19} /></button>
+            <button className="primary-button" onClick={() => setLocation("/inventory")}>استكشف المخزون <ChevronLeft size={19} /></button>
             <button className="secondary-button" onClick={() => scrollToSection("studio")}><Rotate3D size={18} /> شاهد رحلة الكاميرا</button>
           </div>
           <div className="hero-trust"><span>صور رسمية</span><i /><span>لا تحويلات خارجية</span><i /><span>تأكيد التوفر قبل الحجز</span></div>
@@ -398,6 +409,11 @@ export default function Home() {
       <section className="experience-section" id="experience">
         <div className="experience-visual" data-reveal><img src={activeCar.images.interior[0]} alt={`مقصورة ${activeCar.name} — صورة رسمية`} /><div className="experience-lens"><span>READY<br />WHEN YOU ARE</span></div></div>
         <div className="experience-copy" data-reveal><div className="section-label inverse"><span>04</span><i /> التجربة</div><p className="mono-tag accent">FROM SCREEN TO SEAT</p><h2>من الشاشة<br /><em>إلى المقعد.</em></h2><p>الموقع يفتح لك طريقاً منظماً للمعاينة: حدّد ما يناسبك، وثبّت المعلومات، ثم اطلب موعداً مناسباً. لا يتم إرسال أي طلب فعلي قبل ربط بيانات التواصل الرسمية للمعرض.</p><div className="steps">{serviceSteps.map(([number, title, text]) => <div key={number}><span>{number}</span><section><h3>{title}</h3><p>{text}</p></section></div>)}</div><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلب المعاينة <CalendarDays size={18} /></button></div>
+      </section>
+
+      <section className="service-brief" aria-labelledby="service-brief-title">
+        <div className="service-brief-head" data-reveal><div className="section-label"><span>05</span><i /> خدمات المعرض</div><div><p className="mono-tag">BEYOND THE VEHICLE</p><h2 id="service-brief-title">القرار لا ينتهي<br /><em>عند السيارة.</em></h2></div><p>هذه مسارات خدمة جاهزة للربط بتفاصيل التشغيل المعتمدة للمعرض؛ نعرضها بشفافية حتى لا نَعِد بما لم يتم تفعيله بعد.</p></div>
+        <div className="service-brief-grid">{dealershipServices.map(({ icon: Icon, number, title, copy }) => <article key={number} data-reveal><span>{number}</span><Icon size={24} /><h3>{title}</h3><p>{copy}</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ استفسارك <ArrowUpLeft size={16} /></button></article>)}</div>
       </section>
 
       <section className="contact-section" id="contact">

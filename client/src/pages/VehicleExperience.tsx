@@ -66,7 +66,7 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
       }}
     >
       <img src={frames[frameIndex]} alt={alt} draggable={false} />
-      <div className="spin-hud" aria-hidden="true"><span>360° / EXTERIOR</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
+      <div className="spin-hud" aria-hidden="true"><span>دوران خارجي / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
       <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>اسحب لتدور السيارة</span></div>
     </div>
   );
@@ -242,7 +242,7 @@ export default function VehicleExperience() {
             <div className="film-scrim" aria-hidden="true" />
             <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
             <div className="film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-            <div className="film-mode-switch" aria-label="اختيار وضع الاستكشاف"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفيلم</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> 360°</button></div>
+            <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>
             <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${routeProgress})` }} /><div>{vehicle.reels.map((reel, index) => <button key={reel.code} className={index === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${index}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-label={`الانتقال إلى ${reel.eyebrow}`}>{String(index + 1).padStart(2, "0")}</button>)}</div></div>
           </div>
         </div>
