@@ -217,7 +217,7 @@ export default function Home() {
         }
         return current + 1;
       });
-    }, 1750);
+    }, 3400);
     return () => window.clearInterval(timer);
   }, [isDirectorPlaying, cinematicFrames.length]);
 
@@ -244,9 +244,9 @@ export default function Home() {
 
   const onCameraPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -3.5, y: ((event.clientX - rect.left) / rect.width - .5) * 4.5 });
+    setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -1.9, y: ((event.clientX - rect.left) / rect.width - .5) * 2.4 });
     if (!dragRef.current.active) return;
-    const delta = Math.round((dragRef.current.startX - event.clientX) / 70);
+    const delta = Math.round((dragRef.current.startX - event.clientX) / 118);
     moveFrame(dragRef.current.startFrame + delta);
   };
 
@@ -280,6 +280,18 @@ export default function Home() {
         </nav>
         <button className="header-cta" onClick={() => { setBookingOpen(true); setFormSent(false); }}><CalendarDays size={16} /> احجز معاينة</button>
       </header>
+
+      <section className="top-model-strip" aria-label="طرازات المعرض المرجعية">
+        <div className="top-model-strip-head"><span>MODEL INDEX / 02</span><p>طرازات مرجعية — اضغط للدخول إلى ملف السيارة</p></div>
+        <div className="top-model-strip-grid">
+          {cars.map((car) => <button className={`top-model-banner ${car.color}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`}>
+            <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
+            <span className="top-model-banner-scrim" aria-hidden="true" />
+            <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em></span>
+            <span className="top-model-banner-action">افتح ملف السيارة <ArrowUpLeft size={15} /></span>
+          </button>)}
+        </div>
+      </section>
 
       <section className="hero-full" id="top">
         <div className="hero-noise" aria-hidden="true" />

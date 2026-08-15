@@ -85,10 +85,14 @@ const vehicles: Record<string, VehicleFilm> = {
     modelSrc: null,
     spinFrames: [],
     specification: [
+      { label: "الفئة", value: "SUV هجينة" },
       { label: "القوة", value: "240 حصان" },
       { label: "العزم", value: "530 ن.م" },
       { label: "المحرك", value: "1.5T HEV" },
       { label: "الناقل", value: "DHT" },
+      { label: "المنظومة", value: "بنزين / كهرباء" },
+      { label: "سعر المصدر وقت التحقق", value: "1,515,000 ج.م*" },
+      { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
       { code: "REEL 01", eyebrow: "الوصول", title: "قبل ما تقترب، خُد ثانية تشوف الخط كله.", copy: "نبدأ من مسافة كافية: المقدمة، الوقفة، وكيف يلتقط الهيكل الضوء قبل أن تدخل في التفاصيل.", image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg", alignment: "right", fact: "HYBRID / REFERENCE MODEL" },
@@ -117,10 +121,14 @@ const vehicles: Record<string, VehicleFilm> = {
       "/manus-storage/tiggo8pro-black-31_415dec5b.jpg", "/manus-storage/tiggo8pro-black-32_cc879c50.jpg", "/manus-storage/tiggo8pro-black-33_8318c542.jpg", "/manus-storage/tiggo8pro-black-34_177a8eb3.jpg", "/manus-storage/tiggo8pro-black-35_c9f26389.jpg", "/manus-storage/tiggo8pro-black-36_78806ae5.jpg",
     ],
     specification: [
+      { label: "الفئة", value: "SUV — 7 مقاعد" },
       { label: "القوة", value: "197 حصان" },
       { label: "العزم", value: "290 ن.م" },
       { label: "المحرك", value: "1.6L Turbo" },
       { label: "الناقل", value: "7DCT" },
+      { label: "الصفوف", value: "ثلاثة صفوف" },
+      { label: "سعر المصدر وقت التحقق", value: "1,620,000 ج.م*" },
+      { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
       { code: "REEL 01", eyebrow: "الوصول", title: "حضور واسع يبدأ من أول وقفة.", copy: "نأخذ اللقطة الأولى بهدوء كي ترى التكوين كاملاً قبل تفكيكه إلى قرارات تصميم أصغر.", image: "/manus-storage/chery-t8-banner_72ed49f7.jpg", alignment: "right", fact: "7 SEATS / REFERENCE MODEL" },
@@ -242,12 +250,18 @@ export default function VehicleExperience() {
             <div className="film-scrim" aria-hidden="true" />
             <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
             <div className="film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+            <div className={`film-overlay ${active.alignment}`}>
+              <p><span>{active.eyebrow}</span><i aria-hidden="true" /> لقطة {String(activeReel + 1).padStart(2, "0")}</p>
+              <h2>{active.title}</h2>
+              <span>{active.copy}</span>
+              {active.fact && <small>{active.fact}</small>}
+            </div>
             <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>
             <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${routeProgress})` }} /><div>{vehicle.reels.map((reel, index) => <button key={reel.code} className={index === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${index}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-label={`الانتقال إلى ${reel.eyebrow}`}>{String(index + 1).padStart(2, "0")}</button>)}</div></div>
           </div>
         </div>
         <div className="film-story">
-          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel ${reel.alignment}`} key={reel.code}><div><p>{reel.eyebrow} <i aria-hidden="true" /> لقطة {String(index + 1).padStart(2, "0")}</p><figure className="reel-evidence"><img src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — لقطة ${reel.eyebrow} الرسمية`} /><figcaption>المشهد {String(index + 1).padStart(2, "0")} / صورة رسمية مرجعية</figcaption></figure><h2>{reel.title}</h2><span>{reel.copy}</span>{reel.fact && <small>{reel.fact}</small>}</div></article>)}
+          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel ${reel.alignment}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}><span className="film-reel-sr">{reel.copy}</span></article>)}
         </div>
       </section>
 
