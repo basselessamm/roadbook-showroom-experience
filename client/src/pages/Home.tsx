@@ -1,7 +1,7 @@
 /**
  * Design reminder — دفتر طريق المدينة:
- * السيارة هي بطلة المشهد؛ صفحة الطراز الجديدة تقودها التمريرة، وورق حجري/حبر/أحمر إشاري بدل الوهج التقني.
- * مشاهد التجميع طبقات صور رسمية متعددة وليست ادعاءً لنموذج 360° أو لمخزون حي.
+ * السيارة هي بطلة المشهد؛ البانر الكامل هو بوابة كل ملف، وورق حجري/حبر/أحمر إشاري بدل الوهج التقني.
+ * البحث والمقارنة يوصلان إلى قرار واضح؛ الصور الرسمية وحدها تقود المشهد ولا ندّعي مخزوناً حياً أو عارضاً غير موثق.
  */
 import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -23,11 +23,13 @@ import {
   Plus,
   Rewind,
   Rotate3D,
+  Search,
   ShieldCheck,
   Sparkles,
   X,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 
 type Feature = { title: string; caption: string; image: string; label: string };
 type CinematicFrame = { id: string; tag: string; title: string; copy: string; image: string; position?: string };
@@ -144,6 +146,15 @@ const dealershipServices = [
   { icon: Sparkles, number: "04", title: "الكونسيرج", copy: "ننسق معاينتك بين المنصورة وطنطا فور اعتماد جهة التواصل." },
 ];
 
+const comparisonRows = [
+  { label: "الطبيعة", values: ["SUV هجينة", "SUV عائلية — 7 مقاعد"] },
+  { label: "المحرك", values: ["1.5T HEV", "1.6L Turbo"] },
+  { label: "القوة المرجعية", values: ["240 حصان", "197 حصان"] },
+  { label: "العزم المرجعي", values: ["530 ن.م", "290 ن.م"] },
+  { label: "ناقل الحركة", values: ["DHT", "7DCT"] },
+  { label: "تجربة 360°", values: ["رحلة صور خارجية", "دوران خارجي تفاعلي"] },
+];
+
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -173,8 +184,17 @@ export default function Home() {
   const [formSent, setFormSent] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [modelCarouselIndex, setModelCarouselIndex] = useState(0);
+  const [isModelCarouselPaused, setIsModelCarouselPaused] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const dragRef = useRef({ active: false, startX: 0, startFrame: 0 });
   const activeCar = useMemo(() => cars.find((car) => car.id === activeId) ?? cars[0], [activeId]);
+  const searchResults = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase("ar");
+    if (!query) return cars;
+    return cars.filter((car) => [car.brand, car.name, car.className, car.headline, car.copy, car.price, ...car.stats.flatMap((stat) => [stat.label, stat.value])].join(" ").toLocaleLowerCase("ar").includes(query));
+  }, [searchQuery]);
   const cinematicFrames = useMemo<CinematicFrame[]>(() => [
     { id: "arrival", tag: "01 / ARRIVAL", title: "اللقطة الأولى", copy: "واجهة ترسم أول انطباع قبل أن تدور الكاميرا حول السيارة.", image: activeCar.hero, position: "center" },
     { id: "front", tag: "02 / FRONT", title: "نقطة البداية", copy: "الشبك، التوقيع الضوئي، وخطوط الوجه الأمامي في لقطة مقربة.", image: activeCar.images.exterior[0], position: "center" },
@@ -221,6 +241,25 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [isDirectorPlaying, cinematicFrames.length]);
 
+  useEffect(() => {
+    if (isModelCarouselPaused) return;
+    const timer = window.setInterval(() => {
+      setModelCarouselIndex((current) => (current + 1) % cars.length);
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [isModelCarouselPaused]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const selectCar = (id: string) => {
     setActiveId(id);
     setTimeout(() => scrollToSection("studio"), 60);
@@ -234,6 +273,16 @@ export default function Home() {
   const moveFrame = (next: number) => {
     setIsDirectorPlaying(false);
     setCameraFrame(Math.max(0, Math.min(cinematicFrames.length - 1, next)));
+  };
+
+  const moveModelBanner = (direction: number) => {
+    setModelCarouselIndex((current) => (current + direction + cars.length) % cars.length);
+  };
+
+  const openModelFromSearch = (car: Car) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setLocation(`/cars/${car.id}`);
   };
 
   const onCameraPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -278,18 +327,20 @@ export default function Home() {
           <button onClick={() => { scrollToSection("experience"); setMenuOpen(false); }}>تجربتك</button>
           <button onClick={() => { scrollToSection("contact"); setMenuOpen(false); }}>تواصل</button>
         </nav>
-        <button className="header-cta" onClick={() => { setBookingOpen(true); setFormSent(false); }}><CalendarDays size={16} /> احجز معاينة</button>
+        <div className="header-utility"><button className="header-search" onClick={() => setSearchOpen(true)} aria-label="البحث في طرازات ومواصفات المعرض"><Search size={17} /><span>بحث</span><kbd>⌘K</kbd></button><button className="header-cta" onClick={() => { setBookingOpen(true); setFormSent(false); }}><CalendarDays size={16} /> احجز معاينة</button></div>
       </header>
 
       <section className="top-model-strip" aria-label="طرازات المعرض المرجعية">
-        <div className="top-model-strip-head"><span>MODEL INDEX / 02</span><p>طرازات مرجعية — اضغط للدخول إلى ملف السيارة</p></div>
-        <div className="top-model-strip-grid">
+        <div className="top-model-strip-head"><span>MODEL INDEX / 02</span><p>ملف واحد كامل لكل سيارة — صور رسمية وقرار أوضح</p><div className="top-model-controls"><button onClick={() => moveModelBanner(-1)} aria-label="البانر السابق"><ChevronLeft size={17} /></button><span>{String(modelCarouselIndex + 1).padStart(2, "0")} / {String(cars.length).padStart(2, "0")}</span><button onClick={() => moveModelBanner(1)} aria-label="البانر التالي"><ChevronLeft size={17} /></button></div></div>
+        <div className="top-model-carousel" onMouseEnter={() => setIsModelCarouselPaused(true)} onMouseLeave={() => setIsModelCarouselPaused(false)} onFocus={() => setIsModelCarouselPaused(true)} onBlur={() => setIsModelCarouselPaused(false)}>
+          <div className="top-model-carousel-track" style={{ transform: `translate3d(-${modelCarouselIndex * 100}vw, 0, 0)` }}>
           {cars.map((car) => <button className={`top-model-banner ${car.color}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`}>
             <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
             <span className="top-model-banner-scrim" aria-hidden="true" />
-            <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em></span>
+            <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em><span className="top-model-banner-stats">{car.stats.slice(0, 2).map((stat) => <span key={stat.label}><i>{stat.label}</i>{stat.value}</span>)}</span></span>
             <span className="top-model-banner-action">افتح ملف السيارة <ArrowUpLeft size={15} /></span>
-          </button>)}
+          </button>)}</div>
+          <div className="top-model-progress" aria-hidden="true">{cars.map((car, index) => <i key={car.id} className={index === modelCarouselIndex ? "active" : ""} />)}</div>
         </div>
       </section>
 
@@ -341,6 +392,12 @@ export default function Home() {
             <button className="card-action" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلبك <Plus size={18} /></button>
           </article>
         </div>
+      </section>
+
+      <section className="compare-section" id="compare" aria-labelledby="compare-title">
+        <div className="compare-heading" data-reveal><div className="section-label inverse"><span>02</span><i /> قرار مقارن</div><div><p className="mono-tag accent">COMPARE / THEN CONFIRM</p><h2 id="compare-title">اختيار مدروس،<br /><em>من غير ضجيج.</em></h2></div><p>هذه مقارنة للمواصفات المرجعية الظاهرة في ملفات الطرازات. الفئة واللون والتوفر الفعلي تُثبت مع الفرع قبل أي حجز.</p></div>
+        <div className="compare-table" data-reveal><div className="compare-row compare-head"><span>نقطة المقارنة</span>{cars.map((car) => <b key={car.id}>{car.brand}<small>{car.name}</small></b>)}</div>{comparisonRows.map((row) => <div className="compare-row" key={row.label}><span>{row.label}</span>{row.values.map((value, index) => <b key={`${row.label}-${index}`}>{value}</b>)}</div>)}</div>
+        <div className="compare-actions"><button className="outline-button" onClick={() => setLocation("/cars/h6-hev")}>ملف H6 HEV <ArrowUpLeft size={17} /></button><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب مساعدة في الاختيار <CalendarDays size={17} /></button><button className="outline-button" onClick={() => setLocation("/cars/tiggo-8")}>ملف Tiggo 8 <ArrowUpLeft size={17} /></button></div>
       </section>
 
       <section className="studio-section" id="studio">
@@ -435,6 +492,15 @@ export default function Home() {
       <section className="provenance" data-reveal><div><ShieldCheck size={22} /><h3>صورة وبيان، بمصدر واضح.</h3></div><p>{activeCar.source}</p><span>آخر تحقق: 15 أغسطس 2026</span></section>
 
       <footer><div className="footer-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></div><p>واجهة معرض سينمائية — كل الخطوات داخل الموقع. تظل بيانات الفروع ووسائل الاتصال الفعلية بحاجة إلى اعتماد إدارة المعرض قبل النشر التجاري.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
+
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} title="ابحث في الكموني أوتوموتيف" description="ابحث في الطرازات والمواصفات ثم انتقل مباشرة إلى الملف المناسب." className="search-command-dialog" showCloseButton={false}>
+        <CommandInput value={searchQuery} onValueChange={setSearchQuery} placeholder="ابحث باسم الطراز أو المواصفة أو نوع الاستخدام…" autoFocus />
+        <CommandList>
+          {searchResults.length > 0 ? <CommandGroup heading={searchQuery ? `نتائج البحث / ${searchResults.length}` : "طرازات المعرض"}>{searchResults.map((car) => <CommandItem key={car.id} value={`${car.brand} ${car.name} ${car.className} ${car.stats.map((stat) => `${stat.label} ${stat.value}`).join(" ")}`} onSelect={() => openModelFromSearch(car)}><img src={car.hero} alt="" /><span><b>{car.brand} {car.name}</b><small>{car.className} · {car.stats[0].value} · {car.stats[1].value}</small></span><ArrowUpLeft size={16} /></CommandItem>)}</CommandGroup> : <CommandEmpty>لا توجد نتيجة مطابقة. جرّب «SUV» أو «هجينة» أو «7 مقاعد».</CommandEmpty>}
+          <CommandSeparator />
+          <CommandGroup heading="انتقال سريع"><CommandItem value="inventory المخزون" onSelect={() => { setSearchOpen(false); setLocation("/inventory"); }}><Search size={16} /> افتح المخزون الداخلي</CommandItem><CommandItem value="compare مقارنة" onSelect={() => { setSearchOpen(false); scrollToSection("compare"); }}><CircleGauge size={16} /> قارن الطرازين</CommandItem><CommandItem value="appointment معاينة حجز" onSelect={() => { setSearchOpen(false); setBookingOpen(true); setFormSent(false); }}><CalendarDays size={16} /> جهّز طلب معاينة</CommandItem></CommandGroup>
+        </CommandList>
+      </CommandDialog>
 
       {viewerImage && <div className="image-viewer" role="dialog" aria-modal="true" aria-label="معاينة صورة السيارة"><button className="viewer-close" onClick={() => setViewerImage(null)} aria-label="إغلاق المعاينة"><X size={23} /></button><img src={viewerImage} alt="صورة رسمية مكبرة للطراز" /><p>لقطة رسمية مرجعية للطراز المختار</p></div>}
 

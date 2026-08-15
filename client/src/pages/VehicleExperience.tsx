@@ -154,6 +154,7 @@ export default function VehicleExperience() {
   const filmRef = useRef<HTMLElement | null>(null);
 
   const active = vehicle.reels[activeReel];
+  const hasInteractiveSpin = vehicle.spinFrames.length >= 18 || Boolean(vehicle.modelSrc);
 
   useEffect(() => {
     const updateProgress = () => {
@@ -208,14 +209,7 @@ export default function VehicleExperience() {
         "touch-action": "pan-y",
       });
     }
-    return (
-      <div className="asset-waiting" role="status">
-        <span className="asset-waiting-mark"><Rotate3D size={32} /></span>
-        <p>عارض 360° جاهز للأصل المعتمد.</p>
-        <strong>GLB / GLTF أو 24–72 لقطة دوران مرخّصة</strong>
-        <small>لا نستخدم نموذجاً طرفاً ثالثاً أو صوراً متفرقة لنمثل سيارتك بعارض غير دقيق.</small>
-      </div>
-    );
+    return null;
   }, [activeReel, vehicle, viewerMode]);
 
   return (
@@ -237,31 +231,29 @@ export default function VehicleExperience() {
           <h1>{vehicle.name}</h1>
           <p className="product-category">{vehicle.category}</p>
           <p className="product-intro-lead">مشوار بصري من خمس لقطات. حرّك العجلة، وخلي الكاميرا تمشي معك من أول وقفة لحد مكان القيادة.</p>
-          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ المشوار <MoveLeft size={17} /></button><button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> عارض 360°</button></div>
+          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ المشوار <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> عارض 360°</button>}</div>
           <p className="product-price-note">{vehicle.price}</p>
         </div>
         <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>FIRST FRAME / 01</span><i /></div>
       </section>
 
       <section className="film-section" id="film" ref={filmRef}>
-        <div className="film-sticky">
-            <div className="film-stage" data-active-reel={activeReel} aria-live="polite">
-            {viewer}
+        <div className="film-story film-story-visual">
+          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel film-reel-visual ${reel.alignment}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}>
+            <img className="film-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
+            {index === 0 && hasInteractiveSpin && viewerMode === "spin" && viewer}
             <div className="film-scrim" aria-hidden="true" />
             <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
-            <div className="film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-            <div className={`film-overlay ${active.alignment}`}>
-              <p><span>{active.eyebrow}</span><i aria-hidden="true" /> لقطة {String(activeReel + 1).padStart(2, "0")}</p>
-              <h2>{active.title}</h2>
-              <span>{active.copy}</span>
-              {active.fact && <small>{active.fact}</small>}
+            <div className="film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+            <div className={`film-overlay ${reel.alignment}`}>
+              <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> لقطة {String(index + 1).padStart(2, "0")}</p>
+              <h2>{reel.title}</h2>
+              <span>{reel.copy}</span>
+              {reel.fact && <small>{reel.fact}</small>}
             </div>
-            <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>
-            <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${routeProgress})` }} /><div>{vehicle.reels.map((reel, index) => <button key={reel.code} className={index === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${index}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-label={`الانتقال إلى ${reel.eyebrow}`}>{String(index + 1).padStart(2, "0")}</button>)}</div></div>
-          </div>
-        </div>
-        <div className="film-story">
-          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel ${reel.alignment}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}><span className="film-reel-sr">{reel.copy}</span></article>)}
+            {index === 0 && hasInteractiveSpin && <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>}
+            <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${(index + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === index ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+          </article>)}
         </div>
       </section>
 
