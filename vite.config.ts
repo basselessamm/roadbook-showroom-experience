@@ -205,8 +205,33 @@ function vitePluginStorageProxy(): Plugin {
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
 
+/**
+ * GitHub Pages لا يوفّر مسار /manus-storage الخاص بالاستضافة الحالية. عند بناء
+ * نسخة النشر فقط نُحوّل مراجع الصور الرسمية إلى رابطها العام، من دون تغيير
+ * تجربة التطوير أو النشر الحالي.
+ */
+function vitePluginGitHubPagesAssets(): Plugin {
+  const assetOrigin = "https://kafrawicars-undfwezj.manus.space";
+
+  return {
+    name: "github-pages-public-assets",
+    enforce: "pre",
+    transform(code, id) {
+      if (process.env.GITHUB_PAGES !== "true" || !/\.(?:[jt]sx?|css)$/.test(id)) return null;
+      const transformed = code
+        .replaceAll('"/manus-storage/', `"${assetOrigin}/manus-storage/`)
+        .replaceAll("'/manus-storage/", `'${assetOrigin}/manus-storage/`);
+
+      return transformed === code ? null : { code: transformed, map: null };
+    },
+  };
+}
+
+const isGitHubPagesBuild = process.env.GITHUB_PAGES === "true";
+
 export default defineConfig({
-  plugins,
+  base: isGitHubPagesBuild ? "/roadbook-showroom-experience/" : "/",
+  plugins: [...plugins, vitePluginGitHubPagesAssets()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
