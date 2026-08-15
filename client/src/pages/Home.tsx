@@ -260,8 +260,8 @@ export default function Home() {
       <section className="top-model-strip" aria-label="طرازات المعرض المرجعية">
         <div className="top-model-strip-head"><div className="top-model-controls"><button onClick={() => moveModelBanner(-1)} aria-label="البانر السابق"><ChevronLeft size={17} /></button><span>{String(modelCarouselIndex + 1).padStart(2, "0")} / {String(cars.length).padStart(2, "0")}</span><button onClick={() => moveModelBanner(1)} aria-label="البانر التالي"><ChevronLeft size={17} /></button></div></div>
         <div className="top-model-carousel" onMouseEnter={() => setIsModelCarouselPaused(true)} onMouseLeave={() => setIsModelCarouselPaused(false)} onFocus={() => setIsModelCarouselPaused(true)} onBlur={() => setIsModelCarouselPaused(false)}>
-          <div className="top-model-carousel-track" style={{ transform: `translate3d(-${modelCarouselIndex * 50}%, 0, 0)` }}>
-          {cars.map((car) => <button className={`top-model-banner ${car.color}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`}>
+          <div className="top-model-carousel-track">
+          {cars.map((car, index) => <button className={`top-model-banner ${car.color} ${index === modelCarouselIndex ? "is-active" : ""}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`} aria-hidden={index !== modelCarouselIndex} tabIndex={index === modelCarouselIndex ? 0 : -1}>
             <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
             <span className="top-model-banner-scrim" aria-hidden="true" />
             <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em><span className="top-model-banner-stats">{car.stats.slice(0, 2).map((stat) => <span key={stat.label}><i>{stat.label}</i>{stat.value}</span>)}</span></span>
