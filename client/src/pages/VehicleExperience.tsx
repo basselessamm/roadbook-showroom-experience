@@ -171,7 +171,7 @@ const vehicles: Record<string, VehicleFilm> = {
     brand: "HAVAL",
     name: "H6 HEV",
     category: "SUV هجينة",
-    routeCode: "GMS / H6 / REEL-01",
+    routeCode: "DFM / H6 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز، ويشمل العارض ست زوايا خارجية رسمية. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
@@ -205,7 +205,7 @@ const vehicles: Record<string, VehicleFilm> = {
     brand: "CHERY",
     name: "Tiggo 8 Pro Max",
     category: "SUV — 7 مقاعد",
-    routeCode: "GMS / T8 / REEL-01",
+    routeCode: "DFM / T8 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
@@ -249,8 +249,6 @@ export default function VehicleExperience() {
   const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
   const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
   const [activeReel, setActiveReel] = useState(0);
-  const [visibleReel, setVisibleReel] = useState(0);
-  const [loadedReels, setLoadedReels] = useState<Record<number, true>>({});
   const [spinOpen, setSpinOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -269,36 +267,13 @@ export default function VehicleExperience() {
 
   useEffect(() => {
     setActiveReel(0);
-    setVisibleReel(0);
-    setLoadedReels({});
     setSpinOpen(false);
   }, [vehicle.slug]);
-
-  useEffect(() => {
-    let cancelled = false;
-    vehicle.reels.forEach((reel, index) => {
-      const image = new Image();
-      image.decoding = "async";
-      const markLoaded = () => {
-        if (!cancelled) setLoadedReels((loaded) => ({ ...loaded, [index]: true }));
-      };
-      image.onload = markLoaded;
-      image.onerror = markLoaded;
-      image.src = reel.image;
-    });
-    return () => { cancelled = true; };
-  }, [vehicle.slug]);
-
-  useEffect(() => {
-    if (loadedReels[activeReel]) setVisibleReel(activeReel);
-  }, [activeReel, loadedReels]);
-
-  const activeStage = vehicle.reels[visibleReel];
 
   return (
     <main className="product-experience" dir="rtl">
       <header className="product-header">
-        <Link href="/" className="product-brand" aria-label="العودة لجاويش موتورز"><img src="/manus-storage/gawish-motors-route-mark_d64638df.png" alt="رمز جاويش موتورز" /><span><b>جاويش</b><small>MOTORS</small></span></Link>
+        <Link href="/" className="product-brand" aria-label="العودة لدرايف فورم"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="رمز درايف فورم" /><span><b>درايف فورم</b><small>DRIVEFORM</small></span></Link>
         <nav className={menuOpen ? "product-nav open" : "product-nav"} aria-label="تنقل صفحة الطراز">
           <button onClick={() => { scrollTo("film"); setMenuOpen(false); }}>رحلة السيارة</button>
           <button onClick={() => { scrollTo("specs"); setMenuOpen(false); }}>المواصفات</button>
@@ -320,22 +295,27 @@ export default function VehicleExperience() {
         <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
       </section>
 
-      <section className="film-section film-section-continuous" id="film" style={{ "--reel-count": vehicle.reels.length } as React.CSSProperties} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
-        <div className={`cinematic-film-stage copy-${activeStage.alignment}`}>
-          <img key={`${vehicle.slug}-${visibleReel}`} className={`cinematic-stage-image camera-${activeStage.camera}`} src={activeStage.image} alt={`${vehicle.brand} ${vehicle.name} — ${activeStage.eyebrow}، صورة رسمية مرجعية`} />
-          <div key={`cut-${vehicle.slug}-${visibleReel}`} className="cinematic-cut" aria-hidden="true" />
-          <div className="cinematic-stage-scrim" aria-hidden="true" />
-          <div className="cinematic-stage-meta"><span>{activeStage.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(visibleReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-          <div key={`copy-${vehicle.slug}-${visibleReel}`} className="cinematic-stage-copy">
-            <p><span>{activeStage.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
-            <h2>{activeStage.title}</h2>
-            <span>{activeStage.copy}</span>
-            <small>مؤشر قرار / {activeStage.fact}</small>
-          </div>
-          {hasInteractiveSpin && activeReel === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
-          <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(activeReel + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+      <section className="film-section film-section-continuous" id="film" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
+        <div className="cinematic-film-markers">
+          {vehicle.reels.map((reel, index) => {
+            const isActive = index === activeReel;
+            return <article id={`reel-${index}`} data-reel-index={index} className={`cinematic-film-panel copy-${reel.alignment}${isActive ? " is-active" : ""}`} key={reel.code}>
+              <img className={`cinematic-stage-image camera-${reel.camera}`} src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} loading={index < 2 ? "eager" : "lazy"} />
+              <div className="cinematic-cut" aria-hidden="true" />
+              <div className="cinematic-stage-scrim" aria-hidden="true" />
+              <div className="cinematic-driveform-stamp" aria-hidden="true"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="" /><span>DRIVEFORM / MODEL FILE</span></div>
+              <div className="cinematic-stage-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+              <div className="cinematic-stage-copy">
+                <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
+                <h2>{reel.title}</h2>
+                <span>{reel.copy}</span>
+                <small>مؤشر قرار / {reel.fact}</small>
+              </div>
+              {hasInteractiveSpin && index === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
+              <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(activeReel + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+            </article>;
+          })}
         </div>
-        <div className="cinematic-film-markers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} data-reel-index={index} className="cinematic-film-marker" key={reel.code} />)}</div>
       </section>
 
       {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>{vehicle.spinLabel}</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور رسمية`} spinLabel={vehicle.spinLabel ?? "دوران 360° / مصدر رسمي"} spinHint={vehicle.spinHint ?? "اسحب لتدور السيارة"} /></div></div>}
