@@ -287,7 +287,6 @@ export default function Home() {
             <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
             <span className="top-model-banner-scrim" aria-hidden="true" />
             <span className="top-model-banner-copy"><small>{car.number} / {car.brand}</small><b>{car.name}</b><em>{car.className}</em><span className="top-model-banner-stats">{car.stats.slice(0, 2).map((stat) => <span key={stat.label}><i>{stat.label}</i>{stat.value}</span>)}</span></span>
-            <span className="top-model-banner-action">افتح ملف السيارة <ArrowUpLeft size={15} /></span>
           </button>)}</div>
           <div className="top-model-progress" aria-hidden="true">{cars.map((car, index) => <i key={car.id} className={index === modelCarouselIndex ? "active" : ""} />)}</div>
         </div>
