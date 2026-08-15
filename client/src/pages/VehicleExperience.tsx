@@ -34,40 +34,125 @@ type VehicleFilm = {
 
 function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
   const [frameIndex, setFrameIndex] = useState(0);
+  const [layers, setLayers] = useState({ active: "a" as "a" | "b", a: 0, b: 0 });
+  const [loadedFrames, setLoadedFrames] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const dragStart = useRef({ x: 0, frame: 0 });
+  const dragStart = useRef({ x: 0, position: 0 });
+  const lastDrag = useRef({ x: 0, time: 0, velocity: 0 });
+  const targetPosition = useRef(0);
+  const displayedPosition = useRef(0);
+  const renderedFrame = useRef(0);
+  const layersRef = useRef({ active: "a" as "a" | "b", a: 0, b: 0 });
+  const animationFrame = useRef<number | null>(null);
   const frameCount = frames.length;
   const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
 
+  useEffect(() => {
+    let cancelled = false;
+    let complete = 0;
+    const preload = frames.map((source) => {
+      const image = new Image();
+      const markComplete = () => {
+        complete += 1;
+        if (!cancelled) setLoadedFrames(complete);
+      };
+      image.decoding = "async";
+      image.onload = markComplete;
+      image.onerror = markComplete;
+      image.src = source;
+      return image;
+    });
+
+    return () => {
+      cancelled = true;
+      preload.forEach((image) => { image.onload = null; image.onerror = null; });
+    };
+  }, [frames]);
+
+  useEffect(() => () => {
+    if (animationFrame.current !== null) cancelAnimationFrame(animationFrame.current);
+  }, []);
+
+  const revealFrame = (nextFrame: number) => {
+    const wrapped = wrapFrame(nextFrame);
+    if (wrapped === renderedFrame.current) return;
+    renderedFrame.current = wrapped;
+    setFrameIndex(wrapped);
+    const current = layersRef.current;
+    const nextActive = current.active === "a" ? "b" : "a";
+    const nextLayers: { active: "a" | "b"; a: number; b: number } = nextActive === "a"
+      ? { active: nextActive, a: wrapped, b: current.b }
+      : { active: nextActive, a: current.a, b: wrapped };
+    layersRef.current = nextLayers;
+    setLayers(nextLayers);
+  };
+
+  const settleToTarget = () => {
+    if (animationFrame.current !== null) return;
+    const animate = () => {
+      const distance = targetPosition.current - displayedPosition.current;
+      if (Math.abs(distance) < 0.012) {
+        displayedPosition.current = targetPosition.current;
+        revealFrame(Math.round(displayedPosition.current));
+        animationFrame.current = null;
+        return;
+      }
+      displayedPosition.current += distance * 0.19;
+      revealFrame(Math.round(displayedPosition.current));
+      animationFrame.current = requestAnimationFrame(animate);
+    };
+    animationFrame.current = requestAnimationFrame(animate);
+  };
+
+  const nudge = (amount: number) => {
+    targetPosition.current = displayedPosition.current + amount;
+    settleToTarget();
+  };
+
   return (
     <div
-      className={dragging ? "frame-spin-viewer is-dragging" : "frame-spin-viewer"}
+      className={`${dragging ? "frame-spin-viewer is-dragging" : "frame-spin-viewer"}${loadedFrames < frameCount ? " is-preloading" : ""}`}
       role="application"
       tabIndex={0}
       aria-label="عارض دوران 360 درجة. اسحب أفقياً لتدوير السيارة، أو استخدم سهمي اليمين واليسار."
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
-        dragStart.current = { x: event.clientX, frame: frameIndex };
+        targetPosition.current = displayedPosition.current;
+        dragStart.current = { x: event.clientX, position: displayedPosition.current };
+        lastDrag.current = { x: event.clientX, time: performance.now(), velocity: 0 };
         setDragging(true);
       }}
       onPointerMove={(event) => {
         if (!dragging) return;
-        const movement = Math.round((dragStart.current.x - event.clientX) / 11);
-        setFrameIndex(wrapFrame(dragStart.current.frame + movement));
+        const now = performance.now();
+        const elapsed = Math.max(now - lastDrag.current.time, 1);
+        const deltaFrames = (lastDrag.current.x - event.clientX) / 16;
+        lastDrag.current = {
+          x: event.clientX,
+          time: now,
+          velocity: lastDrag.current.velocity * 0.62 + (deltaFrames / elapsed) * 0.38,
+        };
+        targetPosition.current = dragStart.current.position + (dragStart.current.x - event.clientX) / 16;
+        settleToTarget();
       }}
       onPointerUp={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        targetPosition.current += Math.max(-4.5, Math.min(4.5, lastDrag.current.velocity * 135));
+        settleToTarget();
         setDragging(false);
       }}
-      onPointerCancel={() => setDragging(false)}
+      onPointerCancel={() => { targetPosition.current = displayedPosition.current; setDragging(false); }}
       onKeyDown={(event) => {
-        if (event.key === "ArrowRight") { event.preventDefault(); setFrameIndex((current) => wrapFrame(current + 1)); }
-        if (event.key === "ArrowLeft") { event.preventDefault(); setFrameIndex((current) => wrapFrame(current - 1)); }
+        if (event.key === "ArrowRight") { event.preventDefault(); nudge(1); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); nudge(-1); }
       }}
     >
-      <img src={frames[frameIndex]} alt={alt} draggable={false} />
+      <div className="spin-frame-stack" aria-hidden="true">
+        <img className={layers.active === "a" ? "spin-frame is-visible" : "spin-frame"} src={frames[layers.a]} alt="" draggable={false} />
+        <img className={layers.active === "b" ? "spin-frame is-visible" : "spin-frame"} src={frames[layers.b]} alt={alt} draggable={false} />
+      </div>
       <div className="spin-hud" aria-hidden="true"><span>دوران خارجي / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
-      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>اسحب لتدور السيارة</span></div>
+      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : "اسحب لتدور السيارة"}</span></div>
     </div>
   );
 }
