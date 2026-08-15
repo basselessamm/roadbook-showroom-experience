@@ -1,6 +1,6 @@
 /**
- * Design reminder — استديو الحركة الساكنة (النسخة الموسعة):
- * السيارة هي بطلة المشهد؛ مسار عمودي سينمائي، أمبر/سماوي، ومعلومات معرض داخلية فقط.
+ * Design reminder — دفتر طريق المدينة:
+ * السيارة هي بطلة المشهد؛ صفحة الطراز الجديدة تقودها التمريرة، وورق حجري/حبر/أحمر إشاري بدل الوهج التقني.
  * مشاهد التجميع طبقات صور رسمية متعددة وليست ادعاءً لنموذج 360° أو لمخزون حي.
  */
 import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 type Feature = { title: string; caption: string; image: string; label: string };
 type CinematicFrame = { id: string; tag: string; title: string; copy: string; image: string; position?: string };
@@ -151,6 +152,7 @@ function ImageRail({ images, onSelect }: { images: string[]; onSelect: (image: s
 }
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const [activeId, setActiveId] = useState(cars[0].id);
   const [activeTab, setActiveTab] = useState<"overview" | "design" | "cabin" | "performance">("overview");
   const [cameraFrame, setCameraFrame] = useState(0);
@@ -307,7 +309,7 @@ export default function Home() {
               <div className="fleet-card-image"><img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} /><div className="fleet-glow" /></div>
               <div className="fleet-card-index"><span>{car.number}</span><span>{car.brand}</span></div>
               <div className="fleet-card-body"><p>{car.className}</p><h3>{car.name}</h3><small>{car.price}</small></div>
-              <button className="card-action" onClick={() => selectCar(car.id)}>ادخل المشهد <ArrowUpLeft size={18} /></button>
+              <button className="card-action" onClick={() => setLocation(`/cars/${car.id}`)}>ادخل المشهد <ArrowUpLeft size={18} /></button>
             </article>
           ))}
           <article className="fleet-card inquiry-card" data-reveal>
