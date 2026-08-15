@@ -10,9 +10,9 @@
   object-position: center;
   background: #0a0a09;
   transition:
-    opacity 1.15s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 1.7s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: scale(1.012);
+    opacity 1.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 3.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(1.006);
 }
 
 .product-experience .film-image.active {
@@ -137,8 +137,8 @@
   object-fit: cover;
   object-position: center;
   filter: saturate(.82) contrast(1.03) brightness(.86);
-  transform: scale(1.025);
-  transition: transform 1.8s cubic-bezier(.16, 1, .3, 1), filter 1.2s cubic-bezier(.16, 1, .3, 1);
+  transform: scale(1.014);
+  transition: transform 3.8s cubic-bezier(.16, 1, .3, 1), filter 2.1s cubic-bezier(.16, 1, .3, 1);
 }
 
 .product-experience .film-reel-visual:nth-child(2n) .film-reel-image {
@@ -146,7 +146,7 @@
 }
 
 .product-experience .film-reel-visual:hover .film-reel-image {
-  transform: scale(1.01);
+  transform: scale(1.006);
   filter: saturate(.9) contrast(1.04) brightness(.91);
 }
 
@@ -188,13 +188,13 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .product-experience .film-reel-visual .film-reel-image {
-    animation: roadbook-reel-settle 1.25s cubic-bezier(.16, 1, .3, 1) both;
+    animation: roadbook-reel-settle 2.9s cubic-bezier(.16, 1, .3, 1) both;
   }
 }
 
 @keyframes roadbook-reel-settle {
-  from { opacity: .72; transform: scale(1.07); }
-  to { opacity: 1; transform: scale(1.025); }
+  from { opacity: .82; transform: scale(1.035); }
+  to { opacity: 1; transform: scale(1.014); }
 }
 
 @media (max-width: 820px) {

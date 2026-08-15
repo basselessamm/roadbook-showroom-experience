@@ -139,8 +139,8 @@ html body .site-shell .top-model-controls button:last-child svg { transform: rot
 html body .site-shell .top-model-controls button:hover { border-color: #b33a2b; background: #b33a2b; }
 html body .site-shell .top-model-controls span { min-width:40px; color:#f4efe5; text-align:center; }
 html body .site-shell .top-model-carousel { position: relative; width: 100%; min-height: min(780px, 74svh); overflow: hidden; outline: none; }
-html body .site-shell .top-model-carousel-track { display: flex; width: max-content; min-height: min(780px, 74svh); direction: ltr; will-change: transform; transition: transform 950ms cubic-bezier(.22,1,.36,1); }
-html body .site-shell .top-model-banner { position: relative; flex: 0 0 100vw; min-height: min(780px, 74svh); overflow: hidden; padding: 0; color: #fffaf1; border: 0; background: #11110f; cursor: pointer; text-align: right; direction: rtl; }
+html body .site-shell .top-model-carousel-track { display: flex; width: 200%; min-height: min(780px, 74svh); direction: ltr; will-change: transform; transition: transform 1250ms cubic-bezier(.22,1,.36,1); }
+html body .site-shell .top-model-banner { position: relative; flex: 0 0 50%; width: 50%; min-height: min(780px, 74svh); overflow: hidden; padding: 0; color: #fffaf1; border: 0; background: #11110f; cursor: pointer; text-align: right; direction: rtl; }
 html body .site-shell .top-model-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 1.8s cubic-bezier(.22,1,.36,1), filter 1.8s cubic-bezier(.22,1,.36,1); }
 html body .site-shell .top-model-banner-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7,7,6,.20) 0%, rgba(7,7,6,.02) 48%, rgba(7,7,6,.78) 100%), linear-gradient(0deg, rgba(7,7,6,.38), transparent 48%); }
 html body .site-shell .top-model-banner-copy { position: absolute; right: clamp(22px, 7vw, 126px); bottom: clamp(58px, 9vw, 126px); display: grid; max-width: min(570px, 52vw); gap: 8px; text-align: right; }
@@ -156,6 +156,17 @@ html body .site-shell .top-model-banner:hover .top-model-banner-action { opacity
 html body .site-shell .top-model-progress { position:absolute; z-index:4; right:clamp(22px,7vw,126px); bottom:24px; left:clamp(22px,7vw,126px); display:flex; gap:7px; }
 html body .site-shell .top-model-progress i { height:2px; flex:1; background:rgba(255,250,241,.28); transition:background .5s cubic-bezier(.23,1,.32,1); }
 html body .site-shell .top-model-progress i.active { background:#b33a2b; }
+
+/* The showroom gives every offered car the same visual weight; assistance is a concise next step, not a third oversized tile. */
+html body .site-shell .fleet-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+html body .site-shell .fleet-card,
+html body .site-shell .fleet-card:nth-child(1) { grid-column: auto; min-height: clamp(430px, 43vw, 580px); }
+html body .site-shell .fleet-card::before { content: "MODEL / OFFICIAL VISUAL"; }
+html body .site-shell .fleet-inquiry-inline { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 18px; padding: 20px 22px; color: #171715; border-top: 1px solid rgba(23,23,21,.36); border-bottom: 1px solid rgba(23,23,21,.36); background: transparent; }
+html body .site-shell .fleet-inquiry-inline span { color: #b33a2b; font: 600 9px "IBM Plex Mono", monospace; letter-spacing: .12em; }
+html body .site-shell .fleet-inquiry-inline p { margin: 6px 0 0; color: #56534d; font-size: 12px; line-height: 1.8; }
+html body .site-shell .fleet-inquiry-inline .outline-button { flex: none; color: #171715; border-color: #8d8b84; }
+html body .site-shell .fleet-inquiry-inline .outline-button:hover { color: #fffaf1; border-color: #b33a2b; background: #b33a2b; }
 
 /* The quick finder uses the same measured roadbook material, not a generic floating search. */
 .search-command-dialog { width: min(680px, calc(100vw - 32px)) !important; padding: 0 !important; overflow: hidden; color: #f5f1e9; border: 1px solid rgba(231,226,215,.26) !important; border-radius: 0 !important; background: #171715 !important; box-shadow: 14px 14px 0 rgba(179,58,43,.48) !important; }
@@ -214,4 +225,9 @@ html body .site-shell .compare-actions .outline-button { color: #f5f1e9; border-
   html body .site-shell .compare-table { overflow-x:auto; border-left:1px solid rgba(231,226,215,.2); }
   html body .site-shell .compare-row > * { padding:12px; }
   html body .site-shell .compare-row > b { font-size:13px; }
+  html body .site-shell .fleet-grid { grid-template-columns: 1fr; }
+  html body .site-shell .fleet-card,
+  html body .site-shell .fleet-card:nth-child(1) { min-height: 440px; }
+  html body .site-shell .fleet-inquiry-inline { display: grid; align-items: start; gap: 15px; padding: 18px 0; }
+  html body .site-shell .fleet-inquiry-inline .outline-button { width: max-content; }
 }

@@ -3,7 +3,7 @@
  * السيارة هي بطلة المشهد؛ البانر الكامل هو بوابة كل ملف، وورق حجري/حبر/أحمر إشاري بدل الوهج التقني.
  * البحث والمقارنة يوصلان إلى قرار واضح؛ الصور الرسمية وحدها تقود المشهد ولا ندّعي مخزوناً حياً أو عارضاً غير موثق.
  */
-import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpLeft,
@@ -13,16 +13,10 @@ import {
   ChevronDown,
   ChevronLeft,
   CircleGauge,
-  Crosshair,
   Handshake,
   Menu,
-  MousePointer2,
   MoveRight,
-  Pause,
-  Play,
   Plus,
-  Rewind,
-  Rotate3D,
   Search,
   ShieldCheck,
   Sparkles,
@@ -32,7 +26,6 @@ import { useLocation } from "wouter";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 
 type Feature = { title: string; caption: string; image: string; label: string };
-type CinematicFrame = { id: string; tag: string; title: string; copy: string; image: string; position?: string };
 type Car = {
   id: string;
   number: string;
@@ -174,38 +167,22 @@ function ImageRail({ images, onSelect }: { images: string[]; onSelect: (image: s
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [activeId, setActiveId] = useState(cars[0].id);
   const [activeTab, setActiveTab] = useState<"overview" | "design" | "cabin" | "performance">("overview");
-  const [cameraFrame, setCameraFrame] = useState(0);
-  const [isDirectorPlaying, setIsDirectorPlaying] = useState(false);
   const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [formSent, setFormSent] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [modelCarouselIndex, setModelCarouselIndex] = useState(0);
   const [isModelCarouselPaused, setIsModelCarouselPaused] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const dragRef = useRef({ active: false, startX: 0, startFrame: 0 });
-  const activeCar = useMemo(() => cars.find((car) => car.id === activeId) ?? cars[0], [activeId]);
+  const activeCar = cars[0];
   const searchResults = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase("ar");
     if (!query) return cars;
     return cars.filter((car) => [car.brand, car.name, car.className, car.headline, car.copy, car.price, ...car.stats.flatMap((stat) => [stat.label, stat.value])].join(" ").toLocaleLowerCase("ar").includes(query));
   }, [searchQuery]);
-  const cinematicFrames = useMemo<CinematicFrame[]>(() => [
-    { id: "arrival", tag: "01 / ARRIVAL", title: "اللقطة الأولى", copy: "واجهة ترسم أول انطباع قبل أن تدور الكاميرا حول السيارة.", image: activeCar.hero, position: "center" },
-    { id: "front", tag: "02 / FRONT", title: "نقطة البداية", copy: "الشبك، التوقيع الضوئي، وخطوط الوجه الأمامي في لقطة مقربة.", image: activeCar.images.exterior[0], position: "center" },
-    { id: "side", tag: "03 / SIDE", title: "يمر الضوء", copy: "الكاميرا تكشف جانب الهيكل وتفاصيل تلتقط الضوء أثناء الحركة.", image: activeCar.images.exterior[1], position: "center" },
-    { id: "rear", tag: "04 / REAR", title: "ثم النهاية", copy: "لقطة خلفية أو تفصيل خارجي يكمّل دورة النظرة حول السيارة.", image: activeCar.images.exterior[2], position: "center" },
-    { id: "cabin", tag: "05 / CABIN", title: "إلى الداخل", copy: "قطع ناعم من الضوء الخارجي إلى المساحة التي ستقود منها كل يوم.", image: activeCar.images.interior[0], position: "center" },
-    { id: "cockpit", tag: "06 / COCKPIT", title: "في قلب القيادة", copy: "التقنية والتفاصيل أمام السائق؛ النهاية الطبيعية لرحلة الكاميرا.", image: activeCar.images.interior[1], position: "center" },
-    { id: "performance", tag: "07 / MOTION", title: "اللقطة الأخيرة", copy: "مشهد أداء يختم القصة قبل أن تبدأ رحلتك الواقعية مع المعرض.", image: activeCar.images.detail[0], position: "center" },
-  ], [activeCar]);
-  const activeFrame = cinematicFrames[cameraFrame];
-
   useEffect(() => {
     const onScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -220,26 +197,6 @@ export default function Home() {
     onScroll();
     return () => { observer.disconnect(); window.removeEventListener("scroll", onScroll); };
   }, []);
-
-  useEffect(() => {
-    setActiveTab("overview");
-    setCameraFrame(0);
-    setIsDirectorPlaying(false);
-  }, [activeId]);
-
-  useEffect(() => {
-    if (!isDirectorPlaying) return;
-    const timer = window.setInterval(() => {
-      setCameraFrame((current) => {
-        if (current >= cinematicFrames.length - 1) {
-          setIsDirectorPlaying(false);
-          return current;
-        }
-        return current + 1;
-      });
-    }, 3400);
-    return () => window.clearInterval(timer);
-  }, [isDirectorPlaying, cinematicFrames.length]);
 
   useEffect(() => {
     if (isModelCarouselPaused) return;
@@ -260,19 +217,9 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const selectCar = (id: string) => {
-    setActiveId(id);
-    setTimeout(() => scrollToSection("studio"), 60);
-  };
-
   const submitBooking = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormSent(true);
-  };
-
-  const moveFrame = (next: number) => {
-    setIsDirectorPlaying(false);
-    setCameraFrame(Math.max(0, Math.min(cinematicFrames.length - 1, next)));
   };
 
   const moveModelBanner = (direction: number) => {
@@ -283,26 +230,6 @@ export default function Home() {
     setSearchOpen(false);
     setSearchQuery("");
     setLocation(`/cars/${car.id}`);
-  };
-
-  const onCameraPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    dragRef.current = { active: true, startX: event.clientX, startFrame: cameraFrame };
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setIsDirectorPlaying(false);
-  };
-
-  const onCameraPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -1.9, y: ((event.clientX - rect.left) / rect.width - .5) * 2.4 });
-    if (!dragRef.current.active) return;
-    const delta = Math.round((dragRef.current.startX - event.clientX) / 118);
-    moveFrame(dragRef.current.startFrame + delta);
-  };
-
-  const endCameraDrag = (event: PointerEvent<HTMLDivElement>) => {
-    dragRef.current.active = false;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    setTilt({ x: 0, y: 0 });
   };
 
   const previewImages = activeTab === "design" ? activeCar.images.exterior : activeTab === "cabin" ? activeCar.images.interior : activeTab === "performance" ? activeCar.images.detail : [...activeCar.images.exterior, ...activeCar.images.interior];
@@ -323,7 +250,7 @@ export default function Home() {
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
           <button onClick={() => { setLocation("/inventory"); setMenuOpen(false); }}>المخزون</button>
           <button onClick={() => { scrollToSection("fleet"); setMenuOpen(false); }}>الأسطول</button>
-          <button onClick={() => { scrollToSection("studio"); setMenuOpen(false); }}>رحلة الكاميرا</button>
+          <button onClick={() => { scrollToSection("compare"); setMenuOpen(false); }}>المقارنة</button>
           <button onClick={() => { scrollToSection("experience"); setMenuOpen(false); }}>تجربتك</button>
           <button onClick={() => { scrollToSection("contact"); setMenuOpen(false); }}>تواصل</button>
         </nav>
@@ -331,9 +258,9 @@ export default function Home() {
       </header>
 
       <section className="top-model-strip" aria-label="طرازات المعرض المرجعية">
-        <div className="top-model-strip-head"><span>MODEL INDEX / 02</span><p>ملف واحد كامل لكل سيارة — صور رسمية وقرار أوضح</p><div className="top-model-controls"><button onClick={() => moveModelBanner(-1)} aria-label="البانر السابق"><ChevronLeft size={17} /></button><span>{String(modelCarouselIndex + 1).padStart(2, "0")} / {String(cars.length).padStart(2, "0")}</span><button onClick={() => moveModelBanner(1)} aria-label="البانر التالي"><ChevronLeft size={17} /></button></div></div>
+        <div className="top-model-strip-head"><div className="top-model-controls"><button onClick={() => moveModelBanner(-1)} aria-label="البانر السابق"><ChevronLeft size={17} /></button><span>{String(modelCarouselIndex + 1).padStart(2, "0")} / {String(cars.length).padStart(2, "0")}</span><button onClick={() => moveModelBanner(1)} aria-label="البانر التالي"><ChevronLeft size={17} /></button></div></div>
         <div className="top-model-carousel" onMouseEnter={() => setIsModelCarouselPaused(true)} onMouseLeave={() => setIsModelCarouselPaused(false)} onFocus={() => setIsModelCarouselPaused(true)} onBlur={() => setIsModelCarouselPaused(false)}>
-          <div className="top-model-carousel-track" style={{ transform: `translate3d(-${modelCarouselIndex * 100}vw, 0, 0)` }}>
+          <div className="top-model-carousel-track" style={{ transform: `translate3d(-${modelCarouselIndex * 50}%, 0, 0)` }}>
           {cars.map((car) => <button className={`top-model-banner ${car.color}`} key={car.id} onClick={() => setLocation(`/cars/${car.id}`)} aria-label={`فتح ملف ${car.brand} ${car.name}`}>
             <img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} />
             <span className="top-model-banner-scrim" aria-hidden="true" />
@@ -353,7 +280,7 @@ export default function Home() {
           <p className="hero-lead">كل ما تحتاجه للاستكشاف داخل موقع الكموني أوتوموتيف: موديلات مرجعية، تفاصيل دقيقة، وحجز معاينة في تجربة واحدة.</p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => setLocation("/inventory")}>استكشف المخزون <ChevronLeft size={19} /></button>
-            <button className="secondary-button" onClick={() => scrollToSection("studio")}><Rotate3D size={18} /> شاهد رحلة الكاميرا</button>
+            <button className="secondary-button" onClick={() => setLocation(`/cars/${activeCar.id}`)}>شاهد السيارة بالتفصيل <ArrowUpLeft size={18} /></button>
           </div>
           <div className="hero-trust"><span>صور رسمية</span><i /><span>لا تحويلات خارجية</span><i /><span>تأكيد التوفر قبل الحجز</span></div>
         </div>
@@ -379,73 +306,21 @@ export default function Home() {
         </div>
         <div className="fleet-grid">
           {cars.map((car) => (
-            <article className={`fleet-card ${car.color} ${activeId === car.id ? "selected" : ""}`} key={car.id} data-reveal>
+            <article className={`fleet-card ${car.color}`} key={car.id} data-reveal>
               <div className="fleet-card-image"><img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} /><div className="fleet-glow" /></div>
               <div className="fleet-card-index"><span>{car.number}</span><span>{car.brand}</span></div>
               <div className="fleet-card-body"><p>{car.className}</p><h3>{car.name}</h3><small>{car.price}</small></div>
               <button className="card-action" onClick={() => setLocation(`/cars/${car.id}`)}>ادخل المشهد <ArrowUpLeft size={18} /></button>
             </article>
           ))}
-          <article className="fleet-card inquiry-card" data-reveal>
-            <div className="inquiry-pattern"><Crosshair size={56} /><span>YOUR NEXT / 03</span></div>
-            <div className="fleet-card-body"><p>طراز آخر؟</p><h3>قل لنا ما تبحث عنه.</h3><small>اطلب إضافة طراز أو تأكيد متاح.</small></div>
-            <button className="card-action" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلبك <Plus size={18} /></button>
-          </article>
         </div>
+        <div className="fleet-inquiry-inline" data-reveal><div><span>طراز آخر؟</span><p>اذكر استخدامك أو الفئة التي تبحث عنها، وسنجهّز لك طلب معاينة منظم.</p></div><button className="outline-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب مساعدة في الاختيار <ArrowUpLeft size={17} /></button></div>
       </section>
 
       <section className="compare-section" id="compare" aria-labelledby="compare-title">
         <div className="compare-heading" data-reveal><div className="section-label inverse"><span>02</span><i /> قرار مقارن</div><div><p className="mono-tag accent">COMPARE / THEN CONFIRM</p><h2 id="compare-title">اختيار مدروس،<br /><em>من غير ضجيج.</em></h2></div><p>هذه مقارنة للمواصفات المرجعية الظاهرة في ملفات الطرازات. الفئة واللون والتوفر الفعلي تُثبت مع الفرع قبل أي حجز.</p></div>
         <div className="compare-table" data-reveal><div className="compare-row compare-head"><span>نقطة المقارنة</span>{cars.map((car) => <b key={car.id}>{car.brand}<small>{car.name}</small></b>)}</div>{comparisonRows.map((row) => <div className="compare-row" key={row.label}><span>{row.label}</span>{row.values.map((value, index) => <b key={`${row.label}-${index}`}>{value}</b>)}</div>)}</div>
         <div className="compare-actions"><button className="outline-button" onClick={() => setLocation("/cars/h6-hev")}>ملف H6 HEV <ArrowUpLeft size={17} /></button><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب مساعدة في الاختيار <CalendarDays size={17} /></button><button className="outline-button" onClick={() => setLocation("/cars/tiggo-8")}>ملف Tiggo 8 <ArrowUpLeft size={17} /></button></div>
-      </section>
-
-      <section className="studio-section" id="studio">
-        <div className="studio-head" data-reveal>
-          <div className="section-label inverse"><span>02</span><i /> CAMERA ROUTE / 360° VISUAL</div>
-          <div><p className="mono-tag accent">CINEMATIC SEQUENCE / OFFICIAL ANGLES</p><h2>اتفرّج عليها<br /><em>كأن الكاميرا بتلف.</em></h2></div>
-          <div className="model-switch" role="tablist" aria-label="اختيار طراز المشهد">
-            {cars.map((car) => <button key={car.id} className={activeId === car.id ? "active" : ""} onClick={() => setActiveId(car.id)} role="tab"><span>{car.number}</span>{car.brand} {car.name}</button>)}
-          </div>
-        </div>
-        <div
-          className="cinematic-stage"
-          onPointerDown={onCameraPointerDown}
-          onPointerMove={onCameraPointerMove}
-          onPointerUp={endCameraDrag}
-          onPointerCancel={endCameraDrag}
-          onPointerLeave={() => { if (!dragRef.current.active) setTilt({ x: 0, y: 0 }); }}
-          style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg`, "--route-progress": `${(cameraFrame / (cinematicFrames.length - 1)) * 100}%` } as React.CSSProperties}
-        >
-          <div className="camera-grid" aria-hidden="true" /><div className="camera-sphere sphere-one" aria-hidden="true" /><div className="camera-sphere sphere-two" aria-hidden="true" />
-          <div className="camera-frame-stack" aria-label={`رحلة كاميرا سينمائية لـ ${activeCar.brand} ${activeCar.name}`}>
-            {cinematicFrames.map((frame, index) => (
-              <figure className={`camera-frame ${index === cameraFrame ? "active" : ""}`} key={frame.id}>
-                <img src={frame.image} alt={index === cameraFrame ? `${activeCar.name} — ${frame.title}، لقطة رسمية مرجعية` : ""} style={{ objectPosition: frame.position }} />
-                <figcaption>{frame.tag}</figcaption>
-              </figure>
-            ))}
-          </div>
-          <div className="camera-vignette" aria-hidden="true" /><div className="camera-sweep" aria-hidden="true" />
-          <div className="camera-hud" aria-hidden="true"><span>TAKE {String(cameraFrame + 1).padStart(2, "0")}</span><i /><span>{activeCar.brand} / {activeCar.name}</span><i /><span>SEQ / {String(cinematicFrames.length).padStart(2, "0")}</span></div>
-          <div className="camera-copy">
-            <p>{activeFrame.tag}</p><h3>{activeFrame.title}</h3><span>{activeFrame.copy}</span>
-          </div>
-          <div className="camera-console" onPointerDown={(event) => event.stopPropagation()}>
-            <div className="camera-console-top"><span><MousePointer2 size={14} /> اسحب يميناً أو يساراً</span><span>VISUAL 360°</span></div>
-            <div className="camera-route" aria-label="خط زمن رحلة الكاميرا">
-              {cinematicFrames.map((frame, index) => <button key={frame.id} onClick={() => moveFrame(index)} className={index === cameraFrame ? "active" : ""} aria-label={`الانتقال إلى ${frame.title}`}><i /><span>{String(index + 1).padStart(2, "0")}</span></button>)}
-            </div>
-            <div className="camera-controls">
-              <button onClick={() => moveFrame(cameraFrame - 1)} disabled={cameraFrame === 0} aria-label="اللقطة السابقة"><ChevronLeft className="previous-icon" size={18} /></button>
-              <button className="director-button" onClick={() => { if (cameraFrame === cinematicFrames.length - 1) setCameraFrame(0); setIsDirectorPlaying(!isDirectorPlaying); }}><span>{isDirectorPlaying ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}</span>{isDirectorPlaying ? "إيقاف مؤقت" : "شغّل رحلة الكاميرا"}</button>
-              <button onClick={() => moveFrame(cameraFrame + 1)} disabled={cameraFrame === cinematicFrames.length - 1} aria-label="اللقطة التالية"><ChevronLeft size={18} /></button>
-              <button className="restart-button" onClick={() => { setIsDirectorPlaying(false); setCameraFrame(0); }} aria-label="إعادة الرحلة من البداية"><Rewind size={16} /></button>
-            </div>
-          </div>
-          <div className="camera-stamp"><Rotate3D size={17} /><span>CAMERA<br />ROUTE</span></div>
-        </div>
-        <div className="studio-disclaimer"><ShieldCheck size={15} /> هذه رحلة كاميرا سينمائية متعددة اللقطات من صور رسمية للطراز؛ ليست فيديو مصوراً أو نموذج 360° متصلاً، ولا تمثل مخزوناً فورياً.</div>
       </section>
 
       <section className="detail-section">
