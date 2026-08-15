@@ -44,6 +44,8 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
   const animationFrame = useRef<number | null>(null);
   const frameCount = frames.length;
   const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
+  // 36 لقطة رسمية تمثل دورة كاملة؛ اللفة الواحدة تحتاج سحباً مريحاً يقارب 288px.
+  const pixelsPerFrame = 8;
 
   useEffect(() => {
     let cancelled = false;
@@ -117,13 +119,13 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
         if (!dragging) return;
         const now = performance.now();
         const elapsed = Math.max(now - lastDrag.current.time, 1);
-        const deltaFrames = (lastDrag.current.x - event.clientX) / 16;
+        const deltaFrames = (lastDrag.current.x - event.clientX) / pixelsPerFrame;
         lastDrag.current = {
           x: event.clientX,
           time: now,
           velocity: lastDrag.current.velocity * 0.62 + (deltaFrames / elapsed) * 0.38,
         };
-        targetPosition.current = dragStart.current.position + (dragStart.current.x - event.clientX) / 16;
+        targetPosition.current = dragStart.current.position + (dragStart.current.x - event.clientX) / pixelsPerFrame;
         settleToTarget();
       }}
       onPointerUp={(event) => {
@@ -139,7 +141,7 @@ function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
       }}
     >
       <img className="spin-frame" src={frames[frameIndex]} alt={alt} draggable={false} />
-      <div className="spin-hud" aria-hidden="true"><span>دوران خارجي / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
+      <div className="spin-hud" aria-hidden="true"><span>دوران كامل 360° / مصدر رسمي</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
       <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : "اسحب لتدور السيارة"}</span></div>
     </div>
   );
