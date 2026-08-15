@@ -3,7 +3,7 @@
  * السيارة هي بطلة المشهد؛ مسار عمودي سينمائي، أمبر/سماوي، ومعلومات معرض داخلية فقط.
  * مشاهد التجميع طبقات صور رسمية متعددة وليست ادعاءً لنموذج 360° أو لمخزون حي.
  */
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpLeft,
@@ -14,21 +14,20 @@ import {
   ChevronLeft,
   CircleGauge,
   Crosshair,
-  Gauge,
-  Layers3,
   Menu,
   MousePointer2,
   MoveRight,
+  Pause,
   Play,
   Plus,
+  Rewind,
   Rotate3D,
   ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
   X,
 } from "lucide-react";
 
 type Feature = { title: string; caption: string; image: string; label: string };
+type CinematicFrame = { id: string; tag: string; title: string; copy: string; image: string; position?: string };
 type Car = {
   id: string;
   number: string;
@@ -154,15 +153,26 @@ function ImageRail({ images, onSelect }: { images: string[]; onSelect: (image: s
 export default function Home() {
   const [activeId, setActiveId] = useState(cars[0].id);
   const [activeTab, setActiveTab] = useState<"overview" | "design" | "cabin" | "performance">("overview");
-  const [buildStarted, setBuildStarted] = useState(false);
+  const [cameraFrame, setCameraFrame] = useState(0);
+  const [isDirectorPlaying, setIsDirectorPlaying] = useState(false);
   const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [formSent, setFormSent] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const buildRef = useRef<HTMLElement>(null);
+  const dragRef = useRef({ active: false, startX: 0, startFrame: 0 });
   const activeCar = useMemo(() => cars.find((car) => car.id === activeId) ?? cars[0], [activeId]);
+  const cinematicFrames = useMemo<CinematicFrame[]>(() => [
+    { id: "arrival", tag: "01 / ARRIVAL", title: "اللقطة الأولى", copy: "واجهة ترسم أول انطباع قبل أن تدور الكاميرا حول السيارة.", image: activeCar.hero, position: "center" },
+    { id: "front", tag: "02 / FRONT", title: "نقطة البداية", copy: "الشبك، التوقيع الضوئي، وخطوط الوجه الأمامي في لقطة مقربة.", image: activeCar.images.exterior[0], position: "center" },
+    { id: "side", tag: "03 / SIDE", title: "يمر الضوء", copy: "الكاميرا تكشف جانب الهيكل وتفاصيل تلتقط الضوء أثناء الحركة.", image: activeCar.images.exterior[1], position: "center" },
+    { id: "rear", tag: "04 / REAR", title: "ثم النهاية", copy: "لقطة خلفية أو تفصيل خارجي يكمّل دورة النظرة حول السيارة.", image: activeCar.images.exterior[2], position: "center" },
+    { id: "cabin", tag: "05 / CABIN", title: "إلى الداخل", copy: "قطع ناعم من الضوء الخارجي إلى المساحة التي ستقود منها كل يوم.", image: activeCar.images.interior[0], position: "center" },
+    { id: "cockpit", tag: "06 / COCKPIT", title: "في قلب القيادة", copy: "التقنية والتفاصيل أمام السائق؛ النهاية الطبيعية لرحلة الكاميرا.", image: activeCar.images.interior[1], position: "center" },
+    { id: "performance", tag: "07 / MOTION", title: "اللقطة الأخيرة", copy: "مشهد أداء يختم القصة قبل أن تبدأ رحلتك الواقعية مع المعرض.", image: activeCar.images.detail[0], position: "center" },
+  ], [activeCar]);
+  const activeFrame = cinematicFrames[cameraFrame];
 
   useEffect(() => {
     const onScroll = () => {
@@ -180,11 +190,24 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setBuildStarted(false);
     setActiveTab("overview");
-    const timer = window.setTimeout(() => setBuildStarted(true), 450);
-    return () => window.clearTimeout(timer);
+    setCameraFrame(0);
+    setIsDirectorPlaying(false);
   }, [activeId]);
+
+  useEffect(() => {
+    if (!isDirectorPlaying) return;
+    const timer = window.setInterval(() => {
+      setCameraFrame((current) => {
+        if (current >= cinematicFrames.length - 1) {
+          setIsDirectorPlaying(false);
+          return current;
+        }
+        return current + 1;
+      });
+    }, 1750);
+    return () => window.clearInterval(timer);
+  }, [isDirectorPlaying, cinematicFrames.length]);
 
   const selectCar = (id: string) => {
     setActiveId(id);
@@ -194,6 +217,31 @@ export default function Home() {
   const submitBooking = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormSent(true);
+  };
+
+  const moveFrame = (next: number) => {
+    setIsDirectorPlaying(false);
+    setCameraFrame(Math.max(0, Math.min(cinematicFrames.length - 1, next)));
+  };
+
+  const onCameraPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    dragRef.current = { active: true, startX: event.clientX, startFrame: cameraFrame };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDirectorPlaying(false);
+  };
+
+  const onCameraPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -3.5, y: ((event.clientX - rect.left) / rect.width - .5) * 4.5 });
+    if (!dragRef.current.active) return;
+    const delta = Math.round((dragRef.current.startX - event.clientX) / 70);
+    moveFrame(dragRef.current.startFrame + delta);
+  };
+
+  const endCameraDrag = (event: PointerEvent<HTMLDivElement>) => {
+    dragRef.current.active = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    setTilt({ x: 0, y: 0 });
   };
 
   const previewImages = activeTab === "design" ? activeCar.images.exterior : activeTab === "cabin" ? activeCar.images.interior : activeTab === "performance" ? activeCar.images.detail : [...activeCar.images.exterior, ...activeCar.images.interior];
@@ -213,7 +261,7 @@ export default function Home() {
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح القائمة">{menuOpen ? <X size={22} /> : <Menu size={23} />}</button>
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
           <button onClick={() => { scrollToSection("fleet"); setMenuOpen(false); }}>الأسطول</button>
-          <button onClick={() => { scrollToSection("studio"); setMenuOpen(false); }}>المشهد ثلاثي الأبعاد</button>
+          <button onClick={() => { scrollToSection("studio"); setMenuOpen(false); }}>رحلة الكاميرا</button>
           <button onClick={() => { scrollToSection("experience"); setMenuOpen(false); }}>تجربتك</button>
           <button onClick={() => { scrollToSection("contact"); setMenuOpen(false); }}>تواصل</button>
         </nav>
@@ -229,7 +277,7 @@ export default function Home() {
           <p className="hero-lead">كل ما تحتاجه للاستكشاف داخل موقع الكموني أوتوموتيف: موديلات مرجعية، تفاصيل دقيقة، وحجز معاينة في تجربة واحدة.</p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => scrollToSection("fleet")}>استكشف السيارات <ChevronLeft size={19} /></button>
-            <button className="secondary-button" onClick={() => scrollToSection("studio")}><Rotate3D size={18} /> شاهد التجميع البصري</button>
+            <button className="secondary-button" onClick={() => scrollToSection("studio")}><Rotate3D size={18} /> شاهد رحلة الكاميرا</button>
           </div>
           <div className="hero-trust"><span>صور رسمية</span><i /><span>لا تحويلات خارجية</span><i /><span>تأكيد التوفر قبل الحجز</span></div>
         </div>
@@ -270,39 +318,52 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="studio-section" id="studio" ref={buildRef}>
+      <section className="studio-section" id="studio">
         <div className="studio-head" data-reveal>
-          <div className="section-label inverse"><span>02</span><i /> 3D VISUAL STUDIO</div>
-          <div><p className="mono-tag accent">ASSEMBLY / OFFICIAL ANGLES</p><h2>سيارة تُبنى<br /><em>أمام عينيك.</em></h2></div>
+          <div className="section-label inverse"><span>02</span><i /> CAMERA ROUTE / 360° VISUAL</div>
+          <div><p className="mono-tag accent">CINEMATIC SEQUENCE / OFFICIAL ANGLES</p><h2>اتفرّج عليها<br /><em>كأن الكاميرا بتلف.</em></h2></div>
           <div className="model-switch" role="tablist" aria-label="اختيار طراز المشهد">
             {cars.map((car) => <button key={car.id} className={activeId === car.id ? "active" : ""} onClick={() => setActiveId(car.id)} role="tab"><span>{car.number}</span>{car.brand} {car.name}</button>)}
           </div>
         </div>
         <div
-          className={`assembly-stage ${buildStarted ? "assembled" : ""}`}
-          onMouseMove={(event) => {
-            const rect = event.currentTarget.getBoundingClientRect();
-            setTilt({ x: ((event.clientY - rect.top) / rect.height - .5) * -5, y: ((event.clientX - rect.left) / rect.width - .5) * 7 });
-          }}
-          onMouseLeave={() => setTilt({ x: 0, y: 0 })}
-          style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg` } as React.CSSProperties}
+          className="cinematic-stage"
+          onPointerDown={onCameraPointerDown}
+          onPointerMove={onCameraPointerMove}
+          onPointerUp={endCameraDrag}
+          onPointerCancel={endCameraDrag}
+          onPointerLeave={() => { if (!dragRef.current.active) setTilt({ x: 0, y: 0 }); }}
+          style={{ "--tilt-x": `${tilt.x}deg`, "--tilt-y": `${tilt.y}deg`, "--route-progress": `${(cameraFrame / (cinematicFrames.length - 1)) * 100}%` } as React.CSSProperties}
         >
-          <div className="stage-grid" /><div className="stage-disc disc-one" /><div className="stage-disc disc-two" />
-          <div className="stage-numbers" aria-hidden="true"><span>FRAME / {activeCar.number}</span><span>OPTICAL BUILD</span><span>0° / 360°</span></div>
-          <div className="assembly-car" aria-label={`مشهد تجميع بصري لـ${activeCar.brand} ${activeCar.name}`}>
-            <img className="assembly-base" src={activeCar.cutout} alt={`${activeCar.name} — صورة رسمية في مشهد تجميع بصري`} />
-            <img className="assembly-fragment fragment-front" src={activeCar.images.exterior[0]} alt="" />
-            <img className="assembly-fragment fragment-side" src={activeCar.images.exterior[1]} alt="" />
-            <img className="assembly-fragment fragment-rear" src={activeCar.images.exterior[2]} alt="" />
-            <div className="assembly-laser laser-a" /><div className="assembly-laser laser-b" />
+          <div className="camera-grid" aria-hidden="true" /><div className="camera-sphere sphere-one" aria-hidden="true" /><div className="camera-sphere sphere-two" aria-hidden="true" />
+          <div className="camera-frame-stack" aria-label={`رحلة كاميرا سينمائية لـ ${activeCar.brand} ${activeCar.name}`}>
+            {cinematicFrames.map((frame, index) => (
+              <figure className={`camera-frame ${index === cameraFrame ? "active" : ""}`} key={frame.id}>
+                <img src={frame.image} alt={index === cameraFrame ? `${activeCar.name} — ${frame.title}، لقطة رسمية مرجعية` : ""} style={{ objectPosition: frame.position }} />
+                <figcaption>{frame.tag}</figcaption>
+              </figure>
+            ))}
           </div>
-          <div className="assembly-console">
-            <button className="assemble-button" onClick={() => setBuildStarted(!buildStarted)}><Layers3 size={18} /> {buildStarted ? "أعد المشهد" : "ابدأ التجميع"}</button>
-            <p><MousePointer2 size={14} /> حرّك المؤشر لتغيير عمق المشهد</p>
+          <div className="camera-vignette" aria-hidden="true" /><div className="camera-sweep" aria-hidden="true" />
+          <div className="camera-hud" aria-hidden="true"><span>TAKE {String(cameraFrame + 1).padStart(2, "0")}</span><i /><span>{activeCar.brand} / {activeCar.name}</span><i /><span>SEQ / {String(cinematicFrames.length).padStart(2, "0")}</span></div>
+          <div className="camera-copy">
+            <p>{activeFrame.tag}</p><h3>{activeFrame.title}</h3><span>{activeFrame.copy}</span>
           </div>
-          <div className="stage-stamp"><Rotate3D size={17} /><span>VISUAL<br />ASSEMBLY</span></div>
+          <div className="camera-console" onPointerDown={(event) => event.stopPropagation()}>
+            <div className="camera-console-top"><span><MousePointer2 size={14} /> اسحب يميناً أو يساراً</span><span>VISUAL 360°</span></div>
+            <div className="camera-route" aria-label="خط زمن رحلة الكاميرا">
+              {cinematicFrames.map((frame, index) => <button key={frame.id} onClick={() => moveFrame(index)} className={index === cameraFrame ? "active" : ""} aria-label={`الانتقال إلى ${frame.title}`}><i /><span>{String(index + 1).padStart(2, "0")}</span></button>)}
+            </div>
+            <div className="camera-controls">
+              <button onClick={() => moveFrame(cameraFrame - 1)} disabled={cameraFrame === 0} aria-label="اللقطة السابقة"><ChevronLeft className="previous-icon" size={18} /></button>
+              <button className="director-button" onClick={() => { if (cameraFrame === cinematicFrames.length - 1) setCameraFrame(0); setIsDirectorPlaying(!isDirectorPlaying); }}><span>{isDirectorPlaying ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}</span>{isDirectorPlaying ? "إيقاف مؤقت" : "شغّل رحلة الكاميرا"}</button>
+              <button onClick={() => moveFrame(cameraFrame + 1)} disabled={cameraFrame === cinematicFrames.length - 1} aria-label="اللقطة التالية"><ChevronLeft size={18} /></button>
+              <button className="restart-button" onClick={() => { setIsDirectorPlaying(false); setCameraFrame(0); }} aria-label="إعادة الرحلة من البداية"><Rewind size={16} /></button>
+            </div>
+          </div>
+          <div className="camera-stamp"><Rotate3D size={17} /><span>CAMERA<br />ROUTE</span></div>
         </div>
-        <div className="studio-disclaimer"><ShieldCheck size={15} /> هذا تجميع بصري من لقطات رسمية متعددة، وليس نموذج سيارة ثلاثي الأبعاد كاملاً أو إثباتاً لمخزون فوري.</div>
+        <div className="studio-disclaimer"><ShieldCheck size={15} /> هذه رحلة كاميرا سينمائية متعددة اللقطات من صور رسمية للطراز؛ ليست فيديو مصوراً أو نموذج 360° متصلاً، ولا تمثل مخزوناً فورياً.</div>
       </section>
 
       <section className="detail-section">
