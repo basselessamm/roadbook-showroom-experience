@@ -238,24 +238,21 @@ export default function VehicleExperience() {
         <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
       </section>
 
-      <section className="film-section" id="film" ref={filmRef}>
-        <div className="film-story film-story-visual">
-          {vehicle.reels.map((reel, index) => <article id={`reel-${index}`} data-reel-index={index} className={`film-reel film-reel-visual ${reel.alignment} ${index === activeReel ? "is-active" : ""}`} key={reel.code} aria-label={`${reel.eyebrow}: ${reel.title}`}>
-            <img className="film-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
-            {index === 0 && hasInteractiveSpin && viewerMode === "spin" && viewer}
-            <div className="film-scrim" aria-hidden="true" />
-            <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
-            <div className="film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-            <div className={`film-overlay ${reel.alignment}`}>
-              <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> بكرة {String(index + 1).padStart(2, "0")}</p>
-              <h2>{reel.title}</h2>
-              <span>{reel.copy}</span>
-              <small className="film-decision">مرحلة {String(index + 1).padStart(2, "0")} من {String(vehicle.reels.length).padStart(2, "0")} — {reel.fact}</small>
-            </div>
-            {index === 0 && hasInteractiveSpin && <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>}
-            <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${Math.max(.04, routeProgress)})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
-          </article>)}
+      <section className="film-section film-section-continuous" id="film" ref={filmRef} style={{ "--reel-count": vehicle.reels.length, "--film-travel-height": `${vehicle.reels.length * 100}svh` } as React.CSSProperties}>
+        <div className="continuous-film-stage" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
+          {viewer}
+          <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
+          <div className="film-meta continuous-film-meta"><span>{active.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+          <div className={`film-overlay continuous-film-overlay ${active.alignment}`}>
+            <p><span>{active.eyebrow}</span><i aria-hidden="true" /> لقطة {String(activeReel + 1).padStart(2, "0")}</p>
+            <h2>{active.title}</h2>
+            <span>{active.copy}</span>
+            <small className="film-decision">مرحلة {String(activeReel + 1).padStart(2, "0")} من {String(vehicle.reels.length).padStart(2, "0")} — {active.fact}</small>
+          </div>
+          {hasInteractiveSpin && <div className="film-mode-switch continuous-film-mode" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>}
+          <div className="film-route continuous-film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${Math.max(.04, routeProgress)})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
         </div>
+        <div className="continuous-film-triggers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} data-reel-index={index} className="continuous-film-trigger" key={reel.code} />)}</div>
       </section>
 
       <section className="spec-section" id="specs">
