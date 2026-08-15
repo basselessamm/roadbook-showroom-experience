@@ -348,7 +348,7 @@ export default function VehicleExperience() {
 
       <section className="appointment-section" id="appointment">
         <div><p>خطوتك التالية</p><h2>المعاينة تبدأ<br />من هنا.</h2></div>
-        <div className="appointment-copy"><p>حدّد الطراز الذي يهمك، وسنتواصل لتأكيد الفئة المتاحة وموعد الزيارة قبل أي حجز.</p><Link href="/#contact" className="signal-button">اطلب معاينة <ArrowUpLeft size={17} /></Link></div>
+        <div className="appointment-copy"><p>اختر الطراز الذي تريد أن تمشي معه لقطةً بلقطة. نؤكد معك الفئة المتاحة ووقت الزيارة قبل أي حجز.</p><Link href="/#contact" className="signal-button">اختر موعداً للمعاينة <ArrowUpLeft size={17} /></Link></div>
       </section>
     </main>
   );

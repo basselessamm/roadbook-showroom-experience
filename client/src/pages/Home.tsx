@@ -263,9 +263,6 @@ export default function Home() {
   return (
     <main dir="rtl" className={`site-shell expanded ${activeCar.color}`}>
       <div className="page-progress" style={{ transform: `scaleX(${scrollProgress / 100})` }} aria-hidden="true" />
-      <aside className="scene-rail" aria-hidden="true">
-        <span>EL KAMONY / AUTOMOTIVE</span><i /><span>06 : 2026</span>
-      </aside>
 
       <header className="site-header">
         <a className="brand" href="#top" onClick={(event) => { event.preventDefault(); scrollToSection("top"); }} aria-label="الكموني أوتوموتيف">
