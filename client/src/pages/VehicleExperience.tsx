@@ -1,6 +1,6 @@
 /**
  * Design reminder — دفتر طريق المدينة:
- * صفحة طراز تحريريّة تقودها التمريرة. كل لقطة بطاقة سينمائية كاملة الشاشة؛ الصورة الرسمية هي البطل والنص تعليق مقتصد لا يحجبها.
+ * صفحة طراز تحريريّة تقودها التمريرة. المسرح يعرض لقطة كاميرا رسمية واحدة في كل لحظة؛ الصورة هي البطل والنص تعليق مقتصد لا يحجبها.
  * لا يُعرض وضع 360° حقيقياً إلا عند وجود أصل GLB/GLTF أو تسلسل دوران مرخّص.
  */
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ type Reel = {
   copy: string;
   image: string;
   alignment: "right" | "left";
+  camera: "arrival" | "sweep" | "side" | "rear" | "cabin" | "cockpit";
   fact?: string;
 };
 
@@ -192,11 +193,11 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الوصول", title: "قبل الاقتراب، شوف الخط كله.", copy: "المقدمة والوقفة وكيف يلتقط الهيكل الضوء؛ نقطة بداية هادئة قبل التفاصيل.", image: "/manus-storage/haval-h6-hev-official_edb3204f.jpg", alignment: "right", fact: "HYBRID / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الواجهة", title: "الضوء يكشف الخطوط بلا ضجيج.", copy: "واجهة وسقف وتوقيع ضوئي؛ انتقال من الوقفة الكاملة إلى ملمس التصميم.", image: "/manus-storage/haval-h6-light-roof_017bed29.jpg", alignment: "left", fact: "FRONT / LIGHT DETAIL" },
-      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "امشِ حولها؛ الخطوط تتغير.", copy: "امتداد الجسم وتفصيل المرآة والعجلة، من دون عناصر تُغطي الصورة.", image: "/manus-storage/haval-h6-wheel-mirror_99bc238f.jpg", alignment: "right", fact: "SIDE / MATERIAL DETAIL" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "من الخارج للداخل، اللقطة مقصودة.", copy: "شاشة ومقود ومساحة تُقرأ بهدوء؛ قطع واحد بين طريق السيارة ومكانك فيها.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", fact: "CABIN / WIDE ANGLE" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "عند المقود، كل شيء أوضح.", copy: "الشاشة وعناصر التحكم قبل أن تبدأ خطوتك الفعلية للمعاينة.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
+      { code: "REEL 01", eyebrow: "الوصول", title: "الواجهة أولاً. ثم نتحرك معها.", copy: "لقطة واسعة تلتقط الوقفة كاملة قبل أن تتقدم الكاميرا نحو الخطوط الأمامية.", image: "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg", alignment: "right", camera: "arrival", fact: "FRONT / REFERENCE MODEL" },
+      { code: "REEL 02", eyebrow: "الجانب", title: "ثم تنزلق الكاميرا بمحاذاة الخط.", copy: "نغادر الواجهة إلى زاوية جانبية رسمية؛ حركة واحدة تقرأ امتداد الجسم بهدوء.", image: "/manus-storage/haval-h6-hev-spin-02_6976bce3.png", alignment: "left", camera: "side", fact: "SIDE / OFFICIAL ANGLE" },
+      { code: "REEL 03", eyebrow: "الخلف", title: "وتكمل الدورة عند التوقيع الخلفي.", copy: "لقطة خارجية رسمية تكمل مسار الكاميرا حول السيارة قبل دخول المقصورة.", image: "/manus-storage/haval-h6-hev-spin-04_968225b2.png", alignment: "right", camera: "rear", fact: "REAR / OFFICIAL ANGLE" },
+      { code: "REEL 04", eyebrow: "المقصورة", title: "ثم يدخل المشهد إلى الداخل.", copy: "بعد قراءة الجسم، تتسع اللقطة للمقاعد والشاشة والمساحة التي ترافق الطريق.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", camera: "cabin", fact: "CABIN / WIDE ANGLE" },
+      { code: "REEL 05", eyebrow: "القيادة", title: "النهاية عند ما تراه أمامك.", copy: "نختم قريباً من لوحة القيادة وعناصر التحكم، قبل أن تختار موعد المعاينة.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", camera: "cockpit", fact: "COCKPIT / REFERENCE" },
     ],
   },
   "tiggo-8": {
@@ -230,11 +231,11 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الوصول", title: "حضور واسع من أول وقفة.", copy: "لقطة هادئة للتكوين كاملاً قبل أن نقترب من تفاصيله.", image: "/manus-storage/chery-t8-banner_72ed49f7.jpg", alignment: "right", fact: "7 SEATS / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الواجهة", title: "واجهة تصل قبلك.", copy: "الشبك والتوقيع الأمامي نقطة بداية للكتلة التي تمتد على كامل الجسم.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", alignment: "left", fact: "FRONT / EXTERIOR" },
-      { code: "REEL 03", eyebrow: "الخط الجانبي", title: "المساحة لها شكل قبل الرقم.", copy: "امتداد ونِسَب تترك للصورة مهمة كشف التفاصيل الصغيرة.", image: "/manus-storage/chery-t8-exterior-side_8d0a9686.jpg", alignment: "right", fact: "SIDE / PROPORTION" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "مكان أطول للمشوار كله.", copy: "بعد أن تقرأ الجسم، تأتي المقصورة لتفهم مساحة الصفوف ولغتها.", image: "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg", alignment: "left", fact: "CABIN / INTERIOR" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "كل شيء أمامك للطريق.", copy: "نختم عند لوحة القيادة قبل أن تختار موعد معاينتك.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", alignment: "right", fact: "COCKPIT / REFERENCE" },
+      { code: "REEL 01", eyebrow: "الواجهة", title: "من المقدمة يبدأ المشهد.", copy: "لقطة أمامية صريحة؛ ثم تتحرك الكاميرا حول الكتلة بدلاً من تبديل بانرات منفصلة.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", alignment: "right", camera: "arrival", fact: "FRONT / EXTERIOR" },
+      { code: "REEL 02", eyebrow: "الخط الجانبي", title: "بعد الواجهة، يطول الخط.", copy: "انزلاق بصري هادئ نحو النِسَب والامتداد الجانبي قبل أن نصل إلى الخلف.", image: "/manus-storage/tiggo8pro-black-15_4048277e.jpg", alignment: "left", camera: "side", fact: "SIDE / OFFICIAL SPIN" },
+      { code: "REEL 03", eyebrow: "الخلف", title: "من الجانب إلى توقيع الخلف.", copy: "اللقطة التالية تكمل الدورة حول السيارة وتُظهر الكتلة الخلفية بوضوح.", image: "/manus-storage/tiggo8pro-black-05_186bb2c7.jpg", alignment: "right", camera: "rear", fact: "REAR / OFFICIAL SPIN" },
+      { code: "REEL 04", eyebrow: "المقصورة", title: "ومن الخارج، ندخل إلى المساحة.", copy: "تتسع الكاميرا للمقصورة بعد أن يكتمل مسار الهيكل الخارجي.", image: "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg", alignment: "left", camera: "cabin", fact: "CABIN / INTERIOR" },
+      { code: "REEL 05", eyebrow: "القيادة", title: "النهاية عند الطريق أمامك.", copy: "نختم عند لوحة القيادة؛ آخر لقطة قبل أن تختار موعد معاينتك.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", alignment: "right", camera: "cockpit", fact: "COCKPIT / REFERENCE" },
     ],
   },
 };
@@ -248,6 +249,8 @@ export default function VehicleExperience() {
   const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
   const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
   const [activeReel, setActiveReel] = useState(0);
+  const [visibleReel, setVisibleReel] = useState(0);
+  const [loadedReels, setLoadedReels] = useState<Record<number, true>>({});
   const [spinOpen, setSpinOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -266,8 +269,31 @@ export default function VehicleExperience() {
 
   useEffect(() => {
     setActiveReel(0);
+    setVisibleReel(0);
+    setLoadedReels({});
     setSpinOpen(false);
   }, [vehicle.slug]);
+
+  useEffect(() => {
+    let cancelled = false;
+    vehicle.reels.forEach((reel, index) => {
+      const image = new Image();
+      image.decoding = "async";
+      const markLoaded = () => {
+        if (!cancelled) setLoadedReels((loaded) => ({ ...loaded, [index]: true }));
+      };
+      image.onload = markLoaded;
+      image.onerror = markLoaded;
+      image.src = reel.image;
+    });
+    return () => { cancelled = true; };
+  }, [vehicle.slug]);
+
+  useEffect(() => {
+    if (loadedReels[activeReel]) setVisibleReel(activeReel);
+  }, [activeReel, loadedReels]);
+
+  const activeStage = vehicle.reels[visibleReel];
 
   return (
     <main className="product-experience" dir="rtl">
@@ -295,23 +321,21 @@ export default function VehicleExperience() {
       </section>
 
       <section className="film-section film-section-continuous" id="film" style={{ "--reel-count": vehicle.reels.length } as React.CSSProperties} aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
-        <div className="continuous-film-triggers">
-          {vehicle.reels.map((reel, index) => (
-            <article id={`reel-${index}`} data-reel-index={index} style={{ "--reel-layer": index + 1 } as React.CSSProperties} className={`continuous-film-trigger copy-${reel.alignment}${index === activeReel ? " is-active" : ""}`} key={reel.code}>
-              <img className="continuous-reel-image" src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} />
-              <div className="film-scrim continuous-film-scrim" aria-hidden="true" />
-              <div className="film-meta continuous-film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-              <div className={`film-overlay continuous-film-overlay ${reel.alignment}`}>
-                <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> سجلّ اللقطة</p>
-                <h2>{reel.title}</h2>
-                <span>{reel.copy}</span>
-                <small className="film-decision">مؤشر قرار / {reel.fact}</small>
-              </div>
-              {hasInteractiveSpin && index === 0 && <button className="reel-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
-              <div className="film-route continuous-film-route" aria-label={`تنقل بكرات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(index + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
-            </article>
-          ))}
+        <div className={`cinematic-film-stage copy-${activeStage.alignment}`}>
+          <img key={`${vehicle.slug}-${visibleReel}`} className={`cinematic-stage-image camera-${activeStage.camera}`} src={activeStage.image} alt={`${vehicle.brand} ${vehicle.name} — ${activeStage.eyebrow}، صورة رسمية مرجعية`} />
+          <div key={`cut-${vehicle.slug}-${visibleReel}`} className="cinematic-cut" aria-hidden="true" />
+          <div className="cinematic-stage-scrim" aria-hidden="true" />
+          <div className="cinematic-stage-meta"><span>{activeStage.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(visibleReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+          <div key={`copy-${vehicle.slug}-${visibleReel}`} className="cinematic-stage-copy">
+            <p><span>{activeStage.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
+            <h2>{activeStage.title}</h2>
+            <span>{activeStage.copy}</span>
+            <small>مؤشر قرار / {activeStage.fact}</small>
+          </div>
+          {hasInteractiveSpin && activeReel === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
+          <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(activeReel + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
         </div>
+        <div className="cinematic-film-markers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} data-reel-index={index} className="cinematic-film-marker" key={reel.code} />)}</div>
       </section>
 
       {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>{vehicle.spinLabel}</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور رسمية`} spinLabel={vehicle.spinLabel ?? "دوران 360° / مصدر رسمي"} spinHint={vehicle.spinHint ?? "اسحب لتدور السيارة"} /></div></div>}
