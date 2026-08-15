@@ -1,6 +1,6 @@
 /**
  * Design reminder — دفتر طريق المدينة:
- * صفحة طراز تحريريّة تقودها التمريرة. المسرح يعرض لقطة كاميرا رسمية واحدة في كل لحظة؛ الصورة هي البطل والنص تعليق مقتصد لا يحجبها.
+ * صفحة طراز تحريريّة تقودها التمريرة. المسرح يبقى ثابتاً وتتحول اللقطة تدريجياً مع كل تمريرة؛ الصورة هي البطل والنص تعليق مقتصد لا يحجبها.
  * لا يُعرض وضع 360° حقيقياً إلا عند وجود أصل GLB/GLTF أو تسلسل دوران مرخّص.
  */
 import { useEffect, useRef, useState } from "react";
@@ -248,25 +248,49 @@ export default function VehicleExperience() {
   const params = useParams<{ slug: string }>();
   const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
   const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
-  const [activeReel, setActiveReel] = useState(0);
+  const [filmProgress, setFilmProgress] = useState(0);
   const [spinOpen, setSpinOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const filmRef = useRef<HTMLElement | null>(null);
 
   const hasInteractiveSpin = vehicle.spinFrames.length >= 6;
+  const boundedProgress = Math.min(vehicle.reels.length - 1, Math.max(0, filmProgress));
+  const currentReelIndex = Math.floor(boundedProgress);
+  const nextReelIndex = Math.min(vehicle.reels.length - 1, currentReelIndex + 1);
+  const reelTransition = boundedProgress - currentReelIndex;
+  // يبدأ التلاشي فقط قرب منتصف كل بكرة؛ لا نبقي لقطتين متداخلتين طوال مسافة التمرير.
+  const imageTransition = Math.min(1, Math.max(0, (reelTransition - 0.4) / 0.2));
+  const activeReel = Math.min(vehicle.reels.length - 1, Math.round(boundedProgress));
+  const storyReel = vehicle.reels[imageTransition < 0.5 ? currentReelIndex : nextReelIndex];
+  const currentReel = vehicle.reels[currentReelIndex];
+  const nextReel = vehicle.reels[nextReelIndex];
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => {
-        if (entry.isIntersecting) setActiveReel(Number((entry.target as HTMLElement).dataset.reelIndex));
-      }),
-      { rootMargin: "-24% 0px -32% 0px", threshold: 0.06 },
-    );
-    document.querySelectorAll<HTMLElement>("[data-reel-index]").forEach((reel) => observer.observe(reel));
-    return () => observer.disconnect();
+    let frame: number | null = null;
+    const updateFilmProgress = () => {
+      const film = filmRef.current;
+      if (!film) return;
+      const travelDistance = Math.max(film.offsetHeight - window.innerHeight, 1);
+      const travelled = Math.max(0, Math.min(travelDistance, -film.getBoundingClientRect().top));
+      const nextProgress = (travelled / travelDistance) * (vehicle.reels.length - 1);
+      setFilmProgress((previous) => Math.abs(previous - nextProgress) < 0.001 ? previous : nextProgress);
+    };
+    const onScroll = () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateFilmProgress);
+    };
+    updateFilmProgress();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [vehicle.slug]);
 
   useEffect(() => {
-    setActiveReel(0);
+    setFilmProgress(0);
     setSpinOpen(false);
   }, [vehicle.slug]);
 
@@ -295,27 +319,24 @@ export default function VehicleExperience() {
         <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
       </section>
 
-      <section className="film-section film-section-continuous" id="film" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`}>
-        <div className="cinematic-film-markers">
-          {vehicle.reels.map((reel, index) => {
-            const isActive = index === activeReel;
-            return <article id={`reel-${index}`} data-reel-index={index} className={`cinematic-film-panel copy-${reel.alignment}${isActive ? " is-active" : ""}`} key={reel.code}>
-              <img className={`cinematic-stage-image camera-${reel.camera}`} src={reel.image} alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية`} loading={index < 2 ? "eager" : "lazy"} />
-              <div className="cinematic-cut" aria-hidden="true" />
-              <div className="cinematic-stage-scrim" aria-hidden="true" />
-              <div className="cinematic-driveform-stamp" aria-hidden="true"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="" /><span>DRIVEFORM / MODEL FILE</span></div>
-              <div className="cinematic-stage-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-              <div className="cinematic-stage-copy">
-                <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
-                <h2>{reel.title}</h2>
-                <span>{reel.copy}</span>
-                <small>مؤشر قرار / {reel.fact}</small>
-              </div>
-              {hasInteractiveSpin && index === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
-              <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(activeReel + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
-            </article>;
-          })}
+      <section ref={filmRef} className="film-section film-section-continuous" id="film" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`} style={{ minHeight: `${vehicle.reels.length * 100}svh` }}>
+        <div className={`cinematic-film-stage copy-${storyReel.alignment}`}>
+          <img className={`cinematic-stage-image camera-${currentReel.camera} is-current`} src={currentReel.image} alt={`${vehicle.brand} ${vehicle.name} — ${currentReel.eyebrow}، صورة رسمية مرجعية`} loading="eager" style={{ opacity: 1 - imageTransition, transform: `scale(${1.035 + reelTransition * 0.03}) translate3d(${-reelTransition * 0.9}%, ${reelTransition * 0.2}%, 0)` }} />
+          {nextReelIndex !== currentReelIndex && <img className={`cinematic-stage-image camera-${nextReel.camera} is-next`} src={nextReel.image} alt="" aria-hidden="true" loading="eager" style={{ opacity: imageTransition, transform: `scale(${1.075 - imageTransition * 0.04}) translate3d(${(1 - imageTransition) * 1.2}%, ${(1 - imageTransition) * -0.3}%, 0)` }} />}
+          <div className="cinematic-cut" aria-hidden="true" style={{ opacity: Math.max(0, 0.28 - Math.abs(imageTransition - 0.5) * 0.56) }} />
+          <div className="cinematic-stage-scrim" aria-hidden="true" />
+          <div className="cinematic-driveform-stamp" aria-hidden="true"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="" /><span>DRIVEFORM / MODEL FILE</span></div>
+          <div className="cinematic-stage-meta"><span>{storyReel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
+          <div className="cinematic-stage-copy" key={storyReel.code}>
+            <p><span>{storyReel.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
+            <h2>{storyReel.title}</h2>
+            <span>{storyReel.copy}</span>
+            <small>مؤشر قرار / {storyReel.fact}</small>
+          </div>
+          {hasInteractiveSpin && activeReel === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
+          <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(boundedProgress + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
         </div>
+        <div className="cinematic-film-markers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} className="cinematic-film-marker" key={reel.code} />)}</div>
       </section>
 
       {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>{vehicle.spinLabel}</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور رسمية`} spinLabel={vehicle.spinLabel ?? "دوران 360° / مصدر رسمي"} spinHint={vehicle.spinHint ?? "اسحب لتدور السيارة"} /></div></div>}
