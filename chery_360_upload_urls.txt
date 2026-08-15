@@ -1,0 +1,148 @@
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-01.jpg (size: 50183 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-01_a81e2626.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-02.jpg (size: 49381 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-02_f2349b61.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-03.jpg (size: 49281 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-03_1ea50fc3.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-04.jpg (size: 49095 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-04_e5b2dbf9.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-05.jpg (size: 48030 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-05_186bb2c7.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-06.jpg (size: 46087 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-06_96806d72.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-07.jpg (size: 43019 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-07_640cb216.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-08.jpg (size: 37485 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-08_85eba19f.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-09.jpg (size: 33378 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-09_9e831b18.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-10.jpg (size: 36845 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-10_40ae960b.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-11.jpg (size: 42254 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-11_b96be694.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-12.jpg (size: 46074 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-12_5e108d98.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-13.jpg (size: 47837 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-13_7916f2c3.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-14.jpg (size: 48945 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-14_3d0c2fc0.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-15.jpg (size: 49438 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-15_4048277e.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-16.jpg (size: 49761 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-16_d0247a50.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-17.jpg (size: 49065 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-17_f2c4cb6b.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-18.jpg (size: 47753 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-18_f4ec410f.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-19.jpg (size: 48493 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-19_3f0188e0.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-20.jpg (size: 49662 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-20_bb9419a8.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-21.jpg (size: 49392 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-21_79764af2.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-22.jpg (size: 48429 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-22_3b8feb6d.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-23.jpg (size: 47880 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-23_9225cdee.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-24.jpg (size: 45785 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-24_4b5140ed.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-25.jpg (size: 42317 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-25_2513da0c.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-26.jpg (size: 37877 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-26_1319d4de.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-27.jpg (size: 35761 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-27_0cc1d481.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-28.jpg (size: 38248 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-28_04cba39c.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-29.jpg (size: 43387 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-29_c8903146.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-30.jpg (size: 47181 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-30_97f4039c.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-31.jpg (size: 49549 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-31_415dec5b.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-32.jpg (size: 49257 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-32_cc879c50.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-33.jpg (size: 49670 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-33_8318c542.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-34.jpg (size: 50567 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-34_177a8eb3.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-35.jpg (size: 48176 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-35_c9f26389.jpg
+Uploading file (webdev private): /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-36.jpg (size: 47407 bytes)
+File uploaded successfully!
+Storage Path: /manus-storage/tiggo8pro-black-36_78806ae5.jpg
+
+========== Upload Summary ==========
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-01.jpg -> /manus-storage/tiggo8pro-black-01_a81e2626.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-02.jpg -> /manus-storage/tiggo8pro-black-02_f2349b61.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-03.jpg -> /manus-storage/tiggo8pro-black-03_1ea50fc3.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-04.jpg -> /manus-storage/tiggo8pro-black-04_e5b2dbf9.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-05.jpg -> /manus-storage/tiggo8pro-black-05_186bb2c7.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-06.jpg -> /manus-storage/tiggo8pro-black-06_96806d72.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-07.jpg -> /manus-storage/tiggo8pro-black-07_640cb216.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-08.jpg -> /manus-storage/tiggo8pro-black-08_85eba19f.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-09.jpg -> /manus-storage/tiggo8pro-black-09_9e831b18.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-10.jpg -> /manus-storage/tiggo8pro-black-10_40ae960b.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-11.jpg -> /manus-storage/tiggo8pro-black-11_b96be694.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-12.jpg -> /manus-storage/tiggo8pro-black-12_5e108d98.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-13.jpg -> /manus-storage/tiggo8pro-black-13_7916f2c3.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-14.jpg -> /manus-storage/tiggo8pro-black-14_3d0c2fc0.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-15.jpg -> /manus-storage/tiggo8pro-black-15_4048277e.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-16.jpg -> /manus-storage/tiggo8pro-black-16_d0247a50.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-17.jpg -> /manus-storage/tiggo8pro-black-17_f2c4cb6b.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-18.jpg -> /manus-storage/tiggo8pro-black-18_f4ec410f.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-19.jpg -> /manus-storage/tiggo8pro-black-19_3f0188e0.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-20.jpg -> /manus-storage/tiggo8pro-black-20_bb9419a8.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-21.jpg -> /manus-storage/tiggo8pro-black-21_79764af2.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-22.jpg -> /manus-storage/tiggo8pro-black-22_3b8feb6d.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-23.jpg -> /manus-storage/tiggo8pro-black-23_9225cdee.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-24.jpg -> /manus-storage/tiggo8pro-black-24_4b5140ed.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-25.jpg -> /manus-storage/tiggo8pro-black-25_2513da0c.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-26.jpg -> /manus-storage/tiggo8pro-black-26_1319d4de.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-27.jpg -> /manus-storage/tiggo8pro-black-27_0cc1d481.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-28.jpg -> /manus-storage/tiggo8pro-black-28_04cba39c.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-29.jpg -> /manus-storage/tiggo8pro-black-29_c8903146.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-30.jpg -> /manus-storage/tiggo8pro-black-30_97f4039c.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-31.jpg -> /manus-storage/tiggo8pro-black-31_415dec5b.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-32.jpg -> /manus-storage/tiggo8pro-black-32_cc879c50.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-33.jpg -> /manus-storage/tiggo8pro-black-33_8318c542.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-34.jpg -> /manus-storage/tiggo8pro-black-34_177a8eb3.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-35.jpg -> /manus-storage/tiggo8pro-black-35_c9f26389.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/chery-tiggo-8-pro-360/tiggo8pro-black-36.jpg -> /manus-storage/tiggo8pro-black-36_78806ae5.jpg
+=====================================
+Total: 36, Success: 36, Failed: 0

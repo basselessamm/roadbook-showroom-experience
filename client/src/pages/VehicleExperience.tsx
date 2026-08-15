@@ -32,6 +32,46 @@ type VehicleFilm = {
   spinFrames: string[];
 };
 
+function FrameSpinViewer({ frames, alt }: { frames: string[]; alt: string }) {
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, frame: 0 });
+  const frameCount = frames.length;
+  const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
+
+  return (
+    <div
+      className={dragging ? "frame-spin-viewer is-dragging" : "frame-spin-viewer"}
+      role="application"
+      tabIndex={0}
+      aria-label="عارض دوران 360 درجة. اسحب أفقياً لتدوير السيارة، أو استخدم سهمي اليمين واليسار."
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragStart.current = { x: event.clientX, frame: frameIndex };
+        setDragging(true);
+      }}
+      onPointerMove={(event) => {
+        if (!dragging) return;
+        const movement = Math.round((dragStart.current.x - event.clientX) / 11);
+        setFrameIndex(wrapFrame(dragStart.current.frame + movement));
+      }}
+      onPointerUp={(event) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        setDragging(false);
+      }}
+      onPointerCancel={() => setDragging(false)}
+      onKeyDown={(event) => {
+        if (event.key === "ArrowRight") { event.preventDefault(); setFrameIndex((current) => wrapFrame(current + 1)); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); setFrameIndex((current) => wrapFrame(current - 1)); }
+      }}
+    >
+      <img src={frames[frameIndex]} alt={alt} draggable={false} />
+      <div className="spin-hud" aria-hidden="true"><span>360° / EXTERIOR</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
+      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>اسحب لتدور السيارة</span></div>
+    </div>
+  );
+}
+
 const vehicles: Record<string, VehicleFilm> = {
   "h6-hev": {
     slug: "h6-hev",
@@ -68,7 +108,14 @@ const vehicles: Record<string, VehicleFilm> = {
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
     modelSrc: null,
-    spinFrames: [],
+    spinFrames: [
+      "/manus-storage/tiggo8pro-black-01_a81e2626.jpg", "/manus-storage/tiggo8pro-black-02_f2349b61.jpg", "/manus-storage/tiggo8pro-black-03_1ea50fc3.jpg", "/manus-storage/tiggo8pro-black-04_e5b2dbf9.jpg", "/manus-storage/tiggo8pro-black-05_186bb2c7.jpg", "/manus-storage/tiggo8pro-black-06_96806d72.jpg",
+      "/manus-storage/tiggo8pro-black-07_640cb216.jpg", "/manus-storage/tiggo8pro-black-08_85eba19f.jpg", "/manus-storage/tiggo8pro-black-09_9e831b18.jpg", "/manus-storage/tiggo8pro-black-10_40ae960b.jpg", "/manus-storage/tiggo8pro-black-11_b96be694.jpg", "/manus-storage/tiggo8pro-black-12_5e108d98.jpg",
+      "/manus-storage/tiggo8pro-black-13_7916f2c3.jpg", "/manus-storage/tiggo8pro-black-14_3d0c2fc0.jpg", "/manus-storage/tiggo8pro-black-15_4048277e.jpg", "/manus-storage/tiggo8pro-black-16_d0247a50.jpg", "/manus-storage/tiggo8pro-black-17_f2c4cb6b.jpg", "/manus-storage/tiggo8pro-black-18_f4ec410f.jpg",
+      "/manus-storage/tiggo8pro-black-19_3f0188e0.jpg", "/manus-storage/tiggo8pro-black-20_bb9419a8.jpg", "/manus-storage/tiggo8pro-black-21_79764af2.jpg", "/manus-storage/tiggo8pro-black-22_3b8feb6d.jpg", "/manus-storage/tiggo8pro-black-23_9225cdee.jpg", "/manus-storage/tiggo8pro-black-24_4b5140ed.jpg",
+      "/manus-storage/tiggo8pro-black-25_2513da0c.jpg", "/manus-storage/tiggo8pro-black-26_1319d4de.jpg", "/manus-storage/tiggo8pro-black-27_0cc1d481.jpg", "/manus-storage/tiggo8pro-black-28_04cba39c.jpg", "/manus-storage/tiggo8pro-black-29_c8903146.jpg", "/manus-storage/tiggo8pro-black-30_97f4039c.jpg",
+      "/manus-storage/tiggo8pro-black-31_415dec5b.jpg", "/manus-storage/tiggo8pro-black-32_cc879c50.jpg", "/manus-storage/tiggo8pro-black-33_8318c542.jpg", "/manus-storage/tiggo8pro-black-34_177a8eb3.jpg", "/manus-storage/tiggo8pro-black-35_c9f26389.jpg", "/manus-storage/tiggo8pro-black-36_78806ae5.jpg",
+    ],
     specification: [
       { label: "القوة", value: "197 حصان" },
       { label: "العزم", value: "290 ن.م" },
@@ -99,7 +146,6 @@ export default function VehicleExperience() {
   const filmRef = useRef<HTMLElement | null>(null);
 
   const active = vehicle.reels[activeReel];
-  const has360Asset = Boolean(vehicle.modelSrc || vehicle.spinFrames.length >= 18);
 
   useEffect(() => {
     const updateProgress = () => {
@@ -137,6 +183,9 @@ export default function VehicleExperience() {
       return vehicle.reels.map((reel, index) => (
         <img key={reel.code} className={index === activeReel ? "film-image active" : "film-image"} src={reel.image} alt={index === activeReel ? `${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}، صورة رسمية مرجعية` : ""} />
       ));
+    }
+    if (vehicle.spinFrames.length >= 18) {
+      return <FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور Chery الرسمية`} />;
     }
     if (vehicle.modelSrc) {
       return createElement("model-viewer", {
@@ -188,7 +237,7 @@ export default function VehicleExperience() {
 
       <section className="film-section" id="film" ref={filmRef}>
         <div className="film-sticky">
-          <div className="film-stage" aria-live="polite">
+            <div className="film-stage" data-active-reel={activeReel} aria-live="polite">
             {viewer}
             <div className="film-scrim" aria-hidden="true" />
             <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
