@@ -258,8 +258,11 @@ export default function VehicleExperience() {
   const currentReelIndex = Math.floor(boundedProgress);
   const nextReelIndex = Math.min(vehicle.reels.length - 1, currentReelIndex + 1);
   const reelTransition = boundedProgress - currentReelIndex;
-  // يبدأ التلاشي فقط قرب منتصف كل بكرة؛ لا نبقي لقطتين متداخلتين طوال مسافة التمرير.
-  const imageTransition = Math.min(1, Math.max(0, (reelTransition - 0.4) / 0.2));
+  // مزج واسع ومدروس: تبدأ اللقطة التالية قبل منتصف البكرة وتنتهي بعده،
+  // فتبدو الكاميرا وكأنها تكمل حركتها بدلاً من قطع بين صورتين.
+  const imageTransition = Math.min(1, Math.max(0, (reelTransition - 0.3) / 0.4));
+  // ستار خفيف في منتصف المزج يخفي ازدواج حواف السيارة من دون تحويل المشهد إلى شاشة سوداء.
+  const transitionVeil = Math.sin(imageTransition * Math.PI);
   const activeReel = Math.min(vehicle.reels.length - 1, Math.round(boundedProgress));
   const storyReel = vehicle.reels[imageTransition < 0.5 ? currentReelIndex : nextReelIndex];
   const currentReel = vehicle.reels[currentReelIndex];
@@ -321,9 +324,9 @@ export default function VehicleExperience() {
 
       <section ref={filmRef} className="film-section film-section-continuous" id="film" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`} style={{ minHeight: `${vehicle.reels.length * 100}svh` }}>
         <div className={`cinematic-film-stage copy-${storyReel.alignment}`}>
-          <img className={`cinematic-stage-image camera-${currentReel.camera} is-current`} src={currentReel.image} alt={`${vehicle.brand} ${vehicle.name} — ${currentReel.eyebrow}، صورة رسمية مرجعية`} loading="eager" style={{ opacity: 1 - imageTransition, transform: `scale(${1.035 + reelTransition * 0.03}) translate3d(${-reelTransition * 0.9}%, ${reelTransition * 0.2}%, 0)` }} />
-          {nextReelIndex !== currentReelIndex && <img className={`cinematic-stage-image camera-${nextReel.camera} is-next`} src={nextReel.image} alt="" aria-hidden="true" loading="eager" style={{ opacity: imageTransition, transform: `scale(${1.075 - imageTransition * 0.04}) translate3d(${(1 - imageTransition) * 1.2}%, ${(1 - imageTransition) * -0.3}%, 0)` }} />}
-          <div className="cinematic-cut" aria-hidden="true" style={{ opacity: Math.max(0, 0.28 - Math.abs(imageTransition - 0.5) * 0.56) }} />
+          <img className={`cinematic-stage-image camera-${currentReel.camera} is-current`} src={currentReel.image} alt={`${vehicle.brand} ${vehicle.name} — ${currentReel.eyebrow}، صورة رسمية مرجعية`} loading="eager" style={{ opacity: 1 - imageTransition, filter: `saturate(${0.94 - transitionVeil * 0.08}) contrast(1.06) brightness(${0.92 - transitionVeil * 0.07}) blur(${transitionVeil * 1.4}px)`, transform: `scale(${1.026 + reelTransition * 0.014}) translate3d(${-reelTransition * 0.5}%, ${reelTransition * 0.12}%, 0)` }} />
+          {nextReelIndex !== currentReelIndex && <img className={`cinematic-stage-image camera-${nextReel.camera} is-next`} src={nextReel.image} alt="" aria-hidden="true" loading="eager" style={{ opacity: imageTransition, filter: `saturate(${0.94 - transitionVeil * 0.08}) contrast(1.06) brightness(${0.92 - transitionVeil * 0.07}) blur(${transitionVeil * 1.4}px)`, transform: `scale(${1.048 - imageTransition * 0.02}) translate3d(${(1 - imageTransition) * 0.65}%, ${(1 - imageTransition) * -0.16}%, 0)` }} />}
+          <div className="cinematic-cut" aria-hidden="true" style={{ opacity: transitionVeil * 0.38 }} />
           <div className="cinematic-stage-scrim" aria-hidden="true" />
           <div className="cinematic-driveform-stamp" aria-hidden="true"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="" /><span>DRIVEFORM / MODEL FILE</span></div>
           <div className="cinematic-stage-meta"><span>{storyReel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
