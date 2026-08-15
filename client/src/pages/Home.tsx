@@ -296,38 +296,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="hero-full" id="top">
-        <div className="hero-noise" aria-hidden="true" />
-        <div className="signature-route hero-route" aria-hidden="true"><i /><i /><i /></div>
-        <div className="hero-copy" data-reveal>
-          <p className="hero-eyebrow"><BadgeCheck size={14} /> معرض رقمي — معلومات واضحة</p>
-          <h1>المشوار الكبير<br /><em>يبدأ من نظرة.</em></h1>
-          <p className="hero-lead">كل ما تحتاجه للاستكشاف داخل موقع الكموني أوتوموتيف: موديلات مرجعية، تفاصيل دقيقة، وحجز معاينة في تجربة واحدة.</p>
-          <div className="hero-actions">
-            <button className="primary-button" onClick={() => setLocation("/inventory")}>استكشف المخزون <ChevronLeft size={19} /></button>
-            <button className="secondary-button" onClick={() => setLocation(`/cars/${activeCar.id}`)}>شاهد السيارة بالتفصيل <ArrowUpLeft size={18} /></button>
-          </div>
-          <div className="hero-trust"><span>صور رسمية</span><i /><span>لا تحويلات خارجية</span><i /><span>تأكيد التوفر قبل الحجز</span></div>
-        </div>
-        <div className="hero-car-stage" data-reveal>
-          <div className="hero-scanline" />
-          <p className="hero-serial">REFERENCE MODEL / H6 HEV / 01</p>
-          <div className="hero-image-crop"><img src="/manus-storage/haval-h6-hev-official_edb3204f.jpg" alt="هافال H6 HEV — صورة رسمية مرجعية" /></div>
-          <div className="hero-data-chip chip-one"><span>240</span><small>HP / HEV</small></div>
-          <div className="hero-data-chip chip-two"><span>530</span><small>N.M / TORQUE</small></div>
-          <div className="hero-arc arc-a" /><div className="hero-arc arc-b" />
-          <button className="hero-scroll" onClick={() => scrollToSection("fleet")} aria-label="الانتقال إلى الأسطول"><ArrowDownLeft size={18} /><span>SCROLL TO EXPLORE</span></button>
-        </div>
-      </section>
-
       <section className="ticker" aria-label="تعريف بالخدمة"><div>اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i> الكموني أوتوموتيف <i>•</i> اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i></div></section>
 
       <section className="fleet-section" id="fleet">
         <div className="paper-meta" aria-hidden="true"><span>INSPECTION PAPER / 01</span><div className="signature-route"><i /><i /><i /></div><span>EL KAMONY / FILED</span></div>
         <div className="section-top" data-reveal>
           <div className="section-label"><span>01</span><i /> الأسطول المرجعي</div>
-          <div><p className="mono-tag">SELECT / COMPARE / ASK</p><h2>اختر المشهد<br /><em>الذي يشبهك.</em></h2></div>
-          <p>هذه مجموعة استكشاف مرجعية مبنية على الطرازات والصور الرسمية المتاحة. الأسعار والفئات ليست التزاماً بمخزون؛ ثبّت اختيارك معنا أولاً.</p>
+          <div><p className="mono-tag">SELECT / COMPARE / ASK</p><h2>طرازات مختارة<br /><em>تبدأ منها.</em></h2></div>
+          <p>ابدأ بالطراز الأقرب لاحتياجك. الصور والمواصفات مرجعية، بينما الفئة واللون والسعر تؤكدها إدارة المعرض.</p>
         </div>
         <div className="fleet-grid">
           {cars.map((car) => (
@@ -335,15 +311,15 @@ export default function Home() {
               <div className="fleet-card-image"><img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية مرجعية`} /><div className="fleet-glow" /></div>
               <div className="fleet-card-index"><span>{car.number}</span><span>{car.brand}</span></div>
               <div className="fleet-card-body"><p>{car.className}</p><h3>{car.name}</h3><small>{car.price}</small></div>
-              <button className="card-action" onClick={() => setLocation(`/cars/${car.id}`)}>ادخل المشهد <ArrowUpLeft size={18} /></button>
+              <button className="card-action" onClick={() => setLocation(`/cars/${car.id}`)}>شاهد التفاصيل <ArrowUpLeft size={18} /></button>
             </article>
           ))}
         </div>
-        <div className="fleet-inquiry-inline" data-reveal><div><span>طراز آخر؟</span><p>اذكر استخدامك أو الفئة التي تبحث عنها، وسنجهّز لك طلب معاينة منظم.</p></div><button className="outline-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب مساعدة في الاختيار <ArrowUpLeft size={17} /></button></div>
+        <div className="fleet-inquiry-inline" data-reveal><div><span>تبحث عن طراز آخر؟</span><p>اكتب استخدامك أو الفئة التي تفضلها، وسنرتب لك طلب معاينة واضحاً.</p></div><button className="outline-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب ترشيحاً <ArrowUpLeft size={17} /></button></div>
       </section>
 
       <section className="compare-section" id="compare" aria-labelledby="compare-title">
-        <div className="compare-heading" data-reveal><div className="section-label inverse"><span>02</span><i /> قرار مقارن</div><div><p className="mono-tag accent">COMPARE / THEN CONFIRM</p><h2 id="compare-title">اختيار مدروس،<br /><em>من غير ضجيج.</em></h2></div><p>هذه مقارنة للمواصفات المرجعية الظاهرة في ملفات الطرازات. الفئة واللون والتوفر الفعلي تُثبت مع الفرع قبل أي حجز.</p></div>
+        <div className="compare-heading" data-reveal><div className="section-label inverse"><span>02</span><i /> قرار مقارن</div><div><p className="mono-tag accent">COMPARE / THEN CONFIRM</p><h2 id="compare-title">قارن بهدوء،<br /><em>ثم قرر.</em></h2></div><p>قارن المواصفات المرجعية أولاً، ثم أكد الفئة واللون والتوفر الفعلي مع الفرع قبل الحجز.</p></div>
         <div className="compare-table" data-reveal><div className="compare-row compare-head"><span>نقطة المقارنة</span>{cars.map((car) => <b key={car.id}>{car.brand}<small>{car.name}</small></b>)}</div>{comparisonRows.map((row) => <div className="compare-row" key={row.label}><span>{row.label}</span>{row.values.map((value, index) => <b key={`${row.label}-${index}`}>{value}</b>)}</div>)}</div>
         <div className="compare-actions"><button className="outline-button" onClick={() => setLocation("/cars/h6-hev")}>ملف H6 HEV <ArrowUpLeft size={17} /></button><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>اطلب مساعدة في الاختيار <CalendarDays size={17} /></button><button className="outline-button" onClick={() => setLocation("/cars/tiggo-8")}>ملف Tiggo 8 <ArrowUpLeft size={17} /></button></div>
       </section>
@@ -377,21 +353,21 @@ export default function Home() {
 
       <section className="experience-section" id="experience">
         <div className="experience-visual" data-reveal><img src={activeCar.images.interior[0]} alt={`مقصورة ${activeCar.name} — صورة رسمية`} /><div className="experience-lens"><span>READY<br />WHEN YOU ARE</span></div></div>
-        <div className="experience-copy" data-reveal><div className="section-label inverse"><span>04</span><i /> التجربة</div><p className="mono-tag accent">FROM SCREEN TO SEAT</p><h2>من الشاشة<br /><em>إلى المقعد.</em></h2><p>الموقع يفتح لك طريقاً منظماً للمعاينة: حدّد ما يناسبك، وثبّت المعلومات، ثم اطلب موعداً مناسباً. لا يتم إرسال أي طلب فعلي قبل ربط بيانات التواصل الرسمية للمعرض.</p><div className="steps">{serviceSteps.map(([number, title, text]) => <div key={number}><span>{number}</span><section><h3>{title}</h3><p>{text}</p></section></div>)}</div><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلب المعاينة <CalendarDays size={18} /></button></div>
+        <div className="experience-copy" data-reveal><div className="section-label inverse"><span>04</span><i /> التجربة</div><p className="mono-tag accent">FROM SCREEN TO SEAT</p><h2>من الشاشة<br /><em>إلى المعاينة.</em></h2><p>حدد الطراز، راجع معلوماته، ثم اطلب موعداً مناسباً. يتم تأكيد الطلب بعد اعتماد بيانات التواصل الرسمية للمعرض.</p><div className="steps">{serviceSteps.map(([number, title, text]) => <div key={number}><span>{number}</span><section><h3>{title}</h3><p>{text}</p></section></div>)}</div><button className="primary-button" onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ طلب المعاينة <CalendarDays size={18} /></button></div>
       </section>
 
       <section className="service-brief" aria-labelledby="service-brief-title">
-        <div className="service-brief-head" data-reveal><div className="section-label"><span>05</span><i /> خدمات المعرض</div><div><p className="mono-tag">BEYOND THE VEHICLE</p><h2 id="service-brief-title">القرار لا ينتهي<br /><em>عند السيارة.</em></h2></div><p>هذه مسارات خدمة جاهزة للربط بتفاصيل التشغيل المعتمدة للمعرض؛ نعرضها بشفافية حتى لا نَعِد بما لم يتم تفعيله بعد.</p></div>
+        <div className="service-brief-head" data-reveal><div className="section-label"><span>05</span><i /> خدمات المعرض</div><div><p className="mono-tag">BEYOND THE VEHICLE</p><h2 id="service-brief-title">خدمات تساعدك<br /><em>قبل المعاينة.</em></h2></div><p>نوضح ما يمكن تنسيقه الآن، وما يحتاج إلى تأكيد من فريق المعرض؛ من دون وعود غير معتمدة.</p></div>
         <div className="service-brief-grid">{dealershipServices.map(({ icon: Icon, number, title, copy }) => <article key={number} data-reveal><span>{number}</span><Icon size={24} /><h3>{title}</h3><p>{copy}</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ استفسارك <ArrowUpLeft size={16} /></button></article>)}</div>
       </section>
 
       <section className="contact-section" id="contact">
-        <div className="contact-grid" data-reveal><div><p className="mono-tag accent">CONTACT / READY TO CHOOSE</p><h2>خلّي قرارك<br /><em>يبقى واضح.</em></h2><p>أرسل تفاصيل ما تبحث عنه. نموذج الاتصال جاهز للتوصيل بمنظومة واتساب أو CRM المعرض بعد اعتماد رقم التواصل.</p><div className="branch-chips"><span><CircleGauge size={15} /> المنصورة</span><span><CircleGauge size={15} /> طنطا</span></div></div><div className="contact-card"><span className="contact-card-index">KAM / 2026</span><h3>طلب اختيار سيارة</h3><p>الفئة، اللون، والتوفر النهائي تُراجع مع الفريق قبل التأكيد.</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>افتح النموذج <ArrowUpLeft size={19} /></button></div></div>
+        <div className="contact-grid" data-reveal><div><p className="mono-tag accent">CONTACT / READY TO CHOOSE</p><h2>رتّب معاينتك<br /><em>في دقائق.</em></h2><p>أرسل الطراز أو الاستخدام الذي تبحث عنه، وسيتابع الفريق الفئة واللون والتوفر قبل تثبيت الموعد.</p><div className="branch-chips"><span><CircleGauge size={15} /> المنصورة</span><span><CircleGauge size={15} /> طنطا</span></div></div><div className="contact-card"><span className="contact-card-index">KAM / 2026</span><h3>طلب معاينة</h3><p>راجع التفاصيل أولاً، ثم ابدأ الطلب عندما تكون جاهزاً.</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ الطلب <ArrowUpLeft size={19} /></button></div></div>
       </section>
 
-      <section className="provenance" data-reveal><div><ShieldCheck size={22} /><h3>صورة وبيان، بمصدر واضح.</h3></div><p>{activeCar.source}</p><span>آخر تحقق: 15 أغسطس 2026</span></section>
+      <section className="provenance" data-reveal><div><ShieldCheck size={22} /><h3>معلومات موثقة، بمصدر واضح.</h3></div><p>{activeCar.source}</p><span>آخر تحقق: 15 أغسطس 2026</span></section>
 
-      <footer><div className="footer-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></div><p>واجهة معرض سينمائية — كل الخطوات داخل الموقع. تظل بيانات الفروع ووسائل الاتصال الفعلية بحاجة إلى اعتماد إدارة المعرض قبل النشر التجاري.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
+      <footer><div className="footer-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></div><p>كل الاستكشاف داخل الموقع. بيانات الفروع ووسائل التواصل تُفعّل بعد اعتماد إدارة المعرض.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
 
       <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} title="ابحث في الكموني أوتوموتيف" description="ابحث في الطرازات والمواصفات ثم انتقل مباشرة إلى الملف المناسب." className="search-command-dialog" showCloseButton={false}>
         <CommandInput value={searchQuery} onValueChange={setSearchQuery} placeholder="ابحث باسم الطراز أو المواصفة أو نوع الاستخدام…" autoFocus />

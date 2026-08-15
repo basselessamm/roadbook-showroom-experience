@@ -59,12 +59,12 @@ export default function Inventory() {
       </header>
 
       <section className="inventory-intro">
-        <div><p className="inventory-kicker">ROADBOOK / MODEL FILES</p><h1>كل سيارة لها<br /><em>مشهد قبل القرار.</em></h1></div>
-        <p>هذه قائمة استكشاف داخلية للطرازات التي يعرضها الموقع بصورها الرسمية. اضبط الفلتر، افتح الملف، ثم ثبّت التوفر الحقيقي قبل القرار.</p>
+        <div><p className="inventory-kicker">ROADBOOK / MODEL FILES</p><h1>طرازات واضحة<br /><em>قبل قرارك.</em></h1></div>
+        <p>فلتر الطرازات، راجع ملف كل سيارة، ثم أكد الفئة واللون والتوفر مع فريق المعرض.</p>
       </section>
 
       <section className="inventory-tools" aria-label="تصفية السيارات">
-        <div className="filter-title"><SlidersHorizontal size={18} /><span>فلترة الاستكشاف</span></div>
+        <div className="filter-title"><SlidersHorizontal size={18} /><span>تصفية الطرازات</span></div>
         <label>العلامة<select value={brand} onChange={(event) => setBrand(event.target.value)}><option value="all">كل العلامات</option><option value="HAVAL">HAVAL</option><option value="CHERY">CHERY</option></select></label>
         <label>الهيكل<select value={body} onChange={(event) => setBody(event.target.value)}><option value="all">كل الفئات</option><option value="SUV">SUV</option></select></label>
         <p><b>{visibleCars.length}</b> طرازات مرجعية</p>
@@ -75,18 +75,18 @@ export default function Inventory() {
           <article className="inventory-card" key={car.id}>
             <div className="inventory-image"><img src={car.hero} alt={`${car.brand} ${car.name} — صورة رسمية`} /><span>FILE / 0{index + 1}</span></div>
             <div className="inventory-card-copy"><p>{car.brand} <i /> {car.category}</p><h2>{car.name}</h2><div><span>{car.seating}</span><span>سعر مرجعي — يُؤكد</span></div></div>
-            <button onClick={() => openDetails(car)}>افتح المشهد <ArrowUpLeft size={18} /></button>
+            <button onClick={() => openDetails(car)}>عرض التفاصيل <ArrowUpLeft size={18} /></button>
           </article>
         ))}
       </section>
 
-      <section className="inventory-note"><Check size={18} /><p>لا نعرض حالياً أعداد المخزون أو أسعاراً نهائية في الواجهة؛ يتم تأكيدهما مباشرةً مع فريق المعرض.</p></section>
+      <section className="inventory-note"><Check size={18} /><p>لا نعرض أعداد مخزون أو أسعاراً نهائية هنا. يؤكد فريق المعرض التفاصيل قبل أي موعد.</p></section>
 
       {active && <div className="catalog-modal-layer" role="dialog" aria-modal="true" aria-label={`تفاصيل ${active.name}`}>
         <div className="catalog-modal">
           <button className="catalog-close" onClick={() => setActive(null)} aria-label="إغلاق تفاصيل السيارة"><X size={22} /></button>
           <div className="catalog-gallery"><img src={active.images[image]} alt={`${active.name} — صورة رسمية`} /><div>{active.images.map((src, index) => <button key={src} className={index === image ? "active" : ""} onClick={() => setImage(index)}><img src={src} alt={`لقطة ${index + 1}`} /></button>)}</div></div>
-          <div className="catalog-details"><p className="inventory-kicker">ROADBOOK FILE / {active.brand}</p><h2>{active.name}</h2><p className="catalog-category">{active.category} <i /> {active.seating}</p><p>{active.note}</p><dl>{active.specs.map((spec) => <div key={spec.label}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl><div className="catalog-actions"><button className="catalog-primary" onClick={prepareBooking}><CalendarDays size={17} /> جهّز طلب معاينة</button><button className="catalog-secondary" onClick={() => setLocation(`/cars/${active.id}`)}>شاهد الرحلة كاملة <ChevronLeft size={17} /></button></div></div>
+          <div className="catalog-details"><p className="inventory-kicker">ROADBOOK FILE / {active.brand}</p><h2>{active.name}</h2><p className="catalog-category">{active.category} <i /> {active.seating}</p><p>{active.note}</p><dl>{active.specs.map((spec) => <div key={spec.label}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl><div className="catalog-actions"><button className="catalog-primary" onClick={prepareBooking}><CalendarDays size={17} /> ابدأ طلب معاينة</button><button className="catalog-secondary" onClick={() => setLocation(`/cars/${active.id}`)}>شاهد ملف السيارة <ChevronLeft size={17} /></button></div></div>
         </div>
       </div>}
     </main>

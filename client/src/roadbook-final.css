@@ -97,9 +97,11 @@ html body .site-shell .experience-lens br { display: none; }
   transition: opacity 1.3s cubic-bezier(.22, 1, .36, 1), transform 1.8s cubic-bezier(.22, 1, .36, 1);
 }
 .product-experience .film-scrim { background: linear-gradient(0deg, rgba(7,7,6,.72) 0%, rgba(7,7,6,.16) 38%, rgba(7,7,6,.12) 100%); }
-.product-experience .film-reel > div,
+/* لا نُخفي إلا دليل البكرة القديم؛ الطبقات الجديدة (العنوان، المسار، ومفتاح 360°)
+   جزء أساسي من التجربة ويجب أن تبقى مرئية وقابلة للمس. */
+.product-experience .film-reel > .reel-evidence,
 .product-experience .reel-evidence { display: none !important; }
-.product-experience .film-story .film-reel { pointer-events: none; }
+.product-experience .film-story .film-reel { pointer-events: auto; }
 .product-experience .film-reel-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .product-experience .film-overlay {
   position: absolute;

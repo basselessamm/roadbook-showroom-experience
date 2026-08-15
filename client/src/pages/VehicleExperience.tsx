@@ -146,7 +146,8 @@ function scrollTo(id: string) {
 
 export default function VehicleExperience() {
   const params = useParams<{ slug: string }>();
-  const vehicle = vehicles[params.slug] ?? vehicles["h6-hev"];
+  const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
+  const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
   const [activeReel, setActiveReel] = useState(0);
   const [viewerMode, setViewerMode] = useState<"film" | "spin">("film");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -230,11 +231,11 @@ export default function VehicleExperience() {
           <p className="product-brand-line">{vehicle.brand}</p>
           <h1>{vehicle.name}</h1>
           <p className="product-category">{vehicle.category}</p>
-          <p className="product-intro-lead">مشوار بصري من خمس لقطات. حرّك العجلة، وخلي الكاميرا تمشي معك من أول وقفة لحد مكان القيادة.</p>
-          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ المشوار <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> عارض 360°</button>}</div>
+          <p className="product-intro-lead">خمس لقطات رسمية مرتبة كرحلة واحدة: وصول، تصميم، خط جانبي، مقصورة، ثم قرار المعاينة. مرّر بهدوء وخذ كل لقطة في وقتها.</p>
+          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ الاستكشاف <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => { setViewerMode("spin"); scrollTo("film"); }}><Rotate3D size={17} /> استكشف 360°</button>}</div>
           <p className="product-price-note">{vehicle.price}</p>
         </div>
-        <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>FIRST FRAME / 01</span><i /></div>
+        <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
       </section>
 
       <section className="film-section" id="film" ref={filmRef}>
@@ -246,26 +247,26 @@ export default function VehicleExperience() {
             <div className="film-corner film-corner-top" aria-hidden="true" /><div className="film-corner film-corner-bottom" aria-hidden="true" />
             <div className="film-meta"><span>{reel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(index + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
             <div className={`film-overlay ${reel.alignment}`}>
-              <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> لقطة {String(index + 1).padStart(2, "0")}</p>
+              <p><span>{reel.eyebrow}</span><i aria-hidden="true" /> بكرة {String(index + 1).padStart(2, "0")}</p>
               <h2>{reel.title}</h2>
               <span>{reel.copy}</span>
-              {reel.fact && <small>{reel.fact}</small>}
+              <small className="film-decision">مرحلة {String(index + 1).padStart(2, "0")} من {String(vehicle.reels.length).padStart(2, "0")} — {reel.fact}</small>
             </div>
             {index === 0 && hasInteractiveSpin && <div className="film-mode-switch" aria-label="اختيار طريقة استكشاف السيارة"><button className={viewerMode === "film" ? "active" : ""} onClick={() => setViewerMode("film")}><SlidersHorizontal size={15} /> الفصول</button><button className={viewerMode === "spin" ? "active" : ""} onClick={() => setViewerMode("spin")}><Rotate3D size={15} /> دوران خارجي</button></div>}
-            <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${(index + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === index ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+            <div className="film-route" aria-label="تقدم رحلة السيارة"><span style={{ transform: `scaleX(${Math.max(.04, routeProgress)})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
           </article>)}
         </div>
       </section>
 
       <section className="spec-section" id="specs">
-        <div className="spec-heading"><p>MODEL FILE / VERIFIED REFERENCE</p><h2>المعلومة تجي<br />بعد ما تشوف الصورة.</h2></div>
+        <div className="spec-heading"><p>ملف الطراز / بيانات مرجعية</p><h2>المواصفات،<br />بعد المشهد.</h2></div>
         <div className="spec-grid">{vehicle.specification.map((item, index) => <div key={item.label}><span>{String(index + 1).padStart(2, "0")}</span><p>{item.label}</p><b>{item.value}</b></div>)}</div>
         <aside className="spec-source"><Gauge size={18} /><p>{vehicle.source}</p></aside>
       </section>
 
       <section className="appointment-section" id="appointment">
-        <div><p>THE LAST FRAME / YOUR NEXT MOVE</p><h2>المشهد خلص.<br />المعاينة تبدأ من هنا.</h2></div>
-        <div className="appointment-copy"><p>قول لنا الطراز والفئة التي شاهدتها، وسيتم تأكيد المتاح الفعلي وموعد المعاينة من الفرع قبل أي حجز.</p><Link href="/#contact" className="signal-button">افتح طلب المعاينة <ArrowUpLeft size={17} /></Link></div>
+        <div><p>خطوتك التالية</p><h2>المعاينة تبدأ<br />من هنا.</h2></div>
+        <div className="appointment-copy"><p>حدّد الطراز الذي يهمك، وسنتواصل لتأكيد الفئة المتاحة وموعد الزيارة قبل أي حجز.</p><Link href="/#contact" className="signal-button">اطلب معاينة <ArrowUpLeft size={17} /></Link></div>
       </section>
     </main>
   );
