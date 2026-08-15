@@ -1,4 +1,4 @@
-/* Design reminder — دفتر طريق المدينة: خمس بكرات مرئية متصلة، لكل لقطة صورة رسمية ومعلومة قرار ومسار صغير. الورق الحجري يظهر خارج المسرح؛ الأسود داخل اللقطة فقط. */
+/* Design reminder — دفتر طريق المدينة لجاويش موتورز: خمس بكرات مرئية متصلة، لكل لقطة صورة رسمية ومعلومة قرار ومسار صغير. الورق الحجري يظهر خارج المسرح؛ الأسود داخل اللقطة فقط. */
 .product-experience { overflow: visible; }
 
 /* الغلاف امتداد للمسرح: الصورة تقود الشاشة والنص يتنفس فوق منطقة تباين مدروسة. */
@@ -13,8 +13,9 @@
 .product-experience .product-intro .product-price-note { margin-top:1rem; color:#eee3d4; font-size:.68rem; line-height:1.5; text-shadow:0 1px 8px rgba(0,0,0,.82); }
 
 /* مسرح واحد: لا تتراكب صور أو كروت؛ كل نقطة تمرير تستدعي لقطة كاميرا واحدة فقط. */
-.product-experience .film-section-continuous { position:relative; min-height:calc(var(--reel-count) * 100svh); padding:0; background:var(--paper); }
+.product-experience .film-section-continuous { position:relative; min-height:calc(var(--reel-count) * 100svh); padding:0; background:#10100e; }
 .product-experience .cinematic-film-stage { position:sticky; z-index:1; top:0; display:block; height:100svh; overflow:hidden; isolation:isolate; color:#fffaf1; background:#10100e; }
+.product-experience .cinematic-film-stage::before { content:""; position:absolute; z-index:5; top:0; right:clamp(13px,1.6vw,26px); bottom:0; width:2px; opacity:.48; background:repeating-linear-gradient(to bottom,#e7e2d7 0 8px,transparent 8px 20px); pointer-events:none; }
 .product-experience .cinematic-film-markers { position:relative; z-index:0; margin-top:-100svh; pointer-events:none; }
 .product-experience .cinematic-film-marker { height:100svh; scroll-margin-top:0; }
 .product-experience .cinematic-stage-image { position:absolute; z-index:0; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; filter:saturate(.94) contrast(1.06) brightness(.92); will-change:transform,filter; }
@@ -35,7 +36,7 @@
 .product-experience .cinematic-stage-scrim { position:absolute; z-index:1; inset:0; background:linear-gradient(0deg,rgba(8,8,7,.78),rgba(8,8,7,.04) 57%,rgba(8,8,7,.25)); pointer-events:none; }
 .product-experience .cinematic-film-stage.copy-left .cinematic-stage-scrim { background:linear-gradient(90deg,rgba(8,8,7,.84) 0%,rgba(8,8,7,.5) 31%,rgba(8,8,7,.08) 63%,transparent 82%),linear-gradient(0deg,rgba(8,8,7,.76),transparent 54%,rgba(8,8,7,.14)); }
 .product-experience .cinematic-film-stage.copy-right .cinematic-stage-scrim { background:linear-gradient(270deg,rgba(8,8,7,.84) 0%,rgba(8,8,7,.5) 31%,rgba(8,8,7,.08) 63%,transparent 82%),linear-gradient(0deg,rgba(8,8,7,.76),transparent 54%,rgba(8,8,7,.14)); }
-.product-experience .cinematic-stage-meta { position:absolute; z-index:4; top:clamp(28px,3vw,48px); right:clamp(20px,4vw,66px); left:clamp(20px,4vw,66px); display:flex; justify-content:space-between; color:#f4eadc; font:500 10px "IBM Plex Mono",monospace; letter-spacing:.08em; }
+.product-experience .cinematic-stage-meta { position:absolute; z-index:4; top:clamp(28px,3vw,48px); right:clamp(42px,4.8vw,86px); left:clamp(20px,4vw,66px); display:flex; justify-content:space-between; color:#f4eadc; font:500 10px "IBM Plex Mono",monospace; letter-spacing:.08em; }
 .product-experience .cinematic-stage-meta span:last-child { direction:ltr; }
 .product-experience .cinematic-stage-copy { position:absolute; z-index:4; bottom:clamp(100px,10vw,146px); width:min(456px,calc(100% - clamp(88px,12vw,200px))); direction:rtl; text-align:right; animation:stage-copy-in .76s cubic-bezier(.16,1,.3,1) both .08s; }
 .product-experience .copy-right .cinematic-stage-copy { right:clamp(28px,5vw,92px); left:auto; }
@@ -86,7 +87,8 @@
   .product-experience .product-intro-copy { right:0; bottom:0; left:0; width:auto; padding:112px 24px 42px; }
   .product-experience .product-intro h1 { max-width:9ch; color:#fffaf1; font-size:clamp(3rem,13.2vw,4.7rem); }
   .product-experience .product-intro .product-intro-lead { max-width:31ch; font-size:.9rem; line-height:1.7; }
-  .product-experience .cinematic-stage-meta { top:24px; right:18px; left:18px; }
+  .product-experience .cinematic-film-stage::before { right:9px; width:1px; opacity:.38; }
+  .product-experience .cinematic-stage-meta { top:24px; right:26px; left:18px; }
   .product-experience .cinematic-stage-meta span:nth-child(2) { display:none; }
   .product-experience .cinematic-stage-scrim,.product-experience .cinematic-film-stage.copy-left .cinematic-stage-scrim,.product-experience .cinematic-film-stage.copy-right .cinematic-stage-scrim { background:linear-gradient(0deg,rgba(8,8,7,.9),rgba(8,8,7,.1) 58%,rgba(8,8,7,.42)); }
   .product-experience .cinematic-stage-copy { right:24px!important; bottom:82px; left:24px!important; width:auto; }

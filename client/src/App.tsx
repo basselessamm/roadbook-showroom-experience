@@ -12,7 +12,7 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const VehicleExperience = lazy(() => import("./pages/VehicleExperience"));
 
 function RouteLoading() {
-  return <main className="route-loading" dir="rtl"><span>EL KAMONY / ROUTE</span><b>نجهّز المشهد</b></main>;
+  return <main className="route-loading" dir="rtl"><span>GAWISH / ROUTE</span><b>نجهّز المشهد</b></main>;
 }
 
 /** دفتر طريق المدينة: يبقى التوجيه هادئاً وغير مرئي، ويترك التركيز للسيارة والمسار التحريري. */

@@ -171,7 +171,7 @@ const vehicles: Record<string, VehicleFilm> = {
     brand: "HAVAL",
     name: "H6 HEV",
     category: "SUV هجينة",
-    routeCode: "KMN / H6 / REEL-01",
+    routeCode: "GMS / H6 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز، ويشمل العارض ست زوايا خارجية رسمية. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
@@ -205,7 +205,7 @@ const vehicles: Record<string, VehicleFilm> = {
     brand: "CHERY",
     name: "Tiggo 8 Pro Max",
     category: "SUV — 7 مقاعد",
-    routeCode: "KMN / T8 / REEL-01",
+    routeCode: "GMS / T8 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
@@ -298,7 +298,7 @@ export default function VehicleExperience() {
   return (
     <main className="product-experience" dir="rtl">
       <header className="product-header">
-        <Link href="/" className="product-brand" aria-label="العودة للكموني أوتوموتيف"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="رمز الكموني أوتوموتيف" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></Link>
+        <Link href="/" className="product-brand" aria-label="العودة لجاويش موتورز"><img src="/manus-storage/gawish-motors-route-mark_d64638df.png" alt="رمز جاويش موتورز" /><span><b>جاويش</b><small>MOTORS</small></span></Link>
         <nav className={menuOpen ? "product-nav open" : "product-nav"} aria-label="تنقل صفحة الطراز">
           <button onClick={() => { scrollTo("film"); setMenuOpen(false); }}>رحلة السيارة</button>
           <button onClick={() => { scrollTo("specs"); setMenuOpen(false); }}>المواصفات</button>

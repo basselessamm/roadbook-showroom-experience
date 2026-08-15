@@ -265,9 +265,9 @@ export default function Home() {
       <div className="page-progress" style={{ transform: `scaleX(${scrollProgress / 100})` }} aria-hidden="true" />
 
       <header className="site-header">
-        <a className="brand" href="#top" onClick={(event) => { event.preventDefault(); scrollToSection("top"); }} aria-label="الكموني أوتوموتيف">
-          <img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="رمز بصري مجرد للكموني أوتوموتيف" />
-          <span><b>الكموني</b><small>AUTOMOTIVE</small></span>
+        <a className="brand" href="#top" onClick={(event) => { event.preventDefault(); scrollToSection("top"); }} aria-label="جاويش موتورز">
+          <img src="/manus-storage/gawish-motors-route-mark_d64638df.png" alt="رمز بصري مجرد لجاويش موتورز" />
+          <span><b>جاويش</b><small>MOTORS</small></span>
         </a>
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح القائمة">{menuOpen ? <X size={22} /> : <Menu size={23} />}</button>
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="التنقل الرئيسي">
@@ -293,10 +293,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="ticker" aria-label="تعريف بالخدمة"><div>اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i> الكموني أوتوموتيف <i>•</i> اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i></div></section>
+      <section className="ticker" aria-label="تعريف بالخدمة"><div>اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i> جاويش موتورز <i>•</i> اختيار واضح <i>•</i> صور موثقة <i>•</i> معاينة أقرب لقرارك <i>•</i></div></section>
 
       <section className="fleet-section" id="fleet">
-        <div className="paper-meta" aria-hidden="true"><span>INSPECTION PAPER / 01</span><div className="signature-route"><i /><i /><i /></div><span>EL KAMONY / FILED</span></div>
+        <div className="paper-meta" aria-hidden="true"><span>INSPECTION PAPER / 01</span><div className="signature-route"><i /><i /><i /></div><span>GAWISH / FILED</span></div>
         <div className="section-top" data-reveal>
           <div className="section-label"><span>01</span><i /> الأسطول المرجعي</div>
           <div><p className="mono-tag">SELECT / COMPARE / ASK</p><h2>طرازات مختارة<br /><em>تبدأ منها.</em></h2></div>
@@ -359,14 +359,14 @@ export default function Home() {
       </section>
 
       <section className="contact-section" id="contact">
-        <div className="contact-grid" data-reveal><div><p className="mono-tag accent">CONTACT / READY TO CHOOSE</p><h2>رتّب معاينتك<br /><em>في دقائق.</em></h2><p>أرسل الطراز أو الاستخدام الذي تبحث عنه، وسيتابع الفريق الفئة واللون والتوفر قبل تثبيت الموعد.</p><div className="branch-chips"><span><CircleGauge size={15} /> المنصورة</span><span><CircleGauge size={15} /> طنطا</span></div></div><div className="contact-card"><span className="contact-card-index">KAM / 2026</span><h3>طلب معاينة</h3><p>راجع التفاصيل أولاً، ثم ابدأ الطلب عندما تكون جاهزاً.</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ الطلب <ArrowUpLeft size={19} /></button></div></div>
+        <div className="contact-grid" data-reveal><div><p className="mono-tag accent">CONTACT / READY TO CHOOSE</p><h2>رتّب معاينتك<br /><em>في دقائق.</em></h2><p>أرسل الطراز أو الاستخدام الذي تبحث عنه، وسيتابع الفريق الفئة واللون والتوفر قبل تثبيت الموعد.</p><div className="branch-chips"><span><CircleGauge size={15} /> الزقازيق</span><span><CircleGauge size={15} /> تأكيد الموعد</span></div></div><div className="contact-card"><span className="contact-card-index">GMS / 2026</span><h3>طلب معاينة</h3><p>راجع التفاصيل أولاً، ثم ابدأ الطلب عندما تكون جاهزاً.</p><button onClick={() => { setBookingOpen(true); setFormSent(false); }}>ابدأ الطلب <ArrowUpLeft size={19} /></button></div></div>
       </section>
 
       <section className="provenance" data-reveal><div><ShieldCheck size={22} /><h3>معلومات موثقة، بمصدر واضح.</h3></div><p>{activeCar.source}</p><span>آخر تحقق: 15 أغسطس 2026</span></section>
 
-      <footer><div className="footer-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></div><p>كل الاستكشاف داخل الموقع. بيانات الفروع ووسائل التواصل تُفعّل بعد اعتماد إدارة المعرض.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
+      <footer><div className="footer-brand"><img src="/manus-storage/gawish-motors-route-mark_d64638df.png" alt="" /><span><b>جاويش</b><small>MOTORS</small></span></div><p>كل الاستكشاف داخل الموقع. بيانات الفروع ووسائل التواصل تُفعّل بعد اعتماد إدارة المعرض.</p><button onClick={() => scrollToSection("top")}>العودة للأعلى <ChevronDown size={16} /></button></footer>
 
-      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} title="ابحث في الكموني أوتوموتيف" description="ابحث في الطرازات والمواصفات ثم انتقل مباشرة إلى الملف المناسب." className="search-command-dialog" showCloseButton={false}>
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} title="ابحث في جاويش موتورز" description="ابحث في الطرازات والمواصفات ثم انتقل مباشرة إلى الملف المناسب." className="search-command-dialog" showCloseButton={false}>
         <CommandInput value={searchQuery} onValueChange={setSearchQuery} placeholder="ابحث باسم الطراز أو المواصفة أو نوع الاستخدام…" autoFocus />
         <CommandList>
           {searchResults.length > 0 ? <CommandGroup heading={searchQuery ? `نتائج البحث / ${searchResults.length}` : "طرازات المعرض"}>{searchResults.map((car) => <CommandItem key={car.id} value={`${car.brand} ${car.name} ${car.className} ${car.stats.map((stat) => `${stat.label} ${stat.value}`).join(" ")}`} onSelect={() => openModelFromSearch(car)}><img src={car.hero} alt="" /><span><b>{car.brand} {car.name}</b><small>{car.className} · {car.stats[0].value} · {car.stats[1].value}</small></span><ArrowUpLeft size={16} /></CommandItem>)}</CommandGroup> : <CommandEmpty>لا توجد نتيجة مطابقة. جرّب «SUV» أو «هجينة» أو «7 مقاعد».</CommandEmpty>}
@@ -377,7 +377,7 @@ export default function Home() {
 
       {viewerImage && <div className="image-viewer" role="dialog" aria-modal="true" aria-label="معاينة صورة السيارة"><button className="viewer-close" onClick={() => setViewerImage(null)} aria-label="إغلاق المعاينة"><X size={23} /></button><img src={viewerImage} alt="صورة رسمية مكبرة للطراز" /><p>لقطة رسمية مرجعية للطراز المختار</p></div>}
 
-      {bookingOpen && <div className="booking-overlay" role="dialog" aria-modal="true" aria-label="طلب معاينة"><div className="booking-modal"><button className="viewer-close" onClick={() => setBookingOpen(false)} aria-label="إغلاق النموذج"><X size={22} /></button>{formSent ? <div className="form-success"><span><Check size={35} /></span><p className="mono-tag accent">READY FOR CONNECTION</p><h2>تم تجهيز طلبك.</h2><p>في النسخة الحالية لا يتم إرسال البيانات خارج الموقع، حمايةً لخصوصيتك. اربط النموذج بواتساب أو CRM المعرض المعتمد لتفعيل الإرسال الفعلي.</p><button className="primary-button" onClick={() => setBookingOpen(false)}>فهمت <ChevronLeft size={18} /></button></div> : <><p className="mono-tag accent">BOOK A VISIT / STEP 01</p><h2>احجز طريقك<br />للمعاينة.</h2><p>اترك البيانات التي تساعد الفريق على تأكيد الفئة والفرع المناسبين.</p><form onSubmit={submitBooking}><label>الاسم<input required placeholder="اكتب اسمك" /></label><label>رقم الهاتف<input required inputMode="tel" placeholder="01X XXX XXXX" /></label><label>الطراز المهتم به<select defaultValue={activeCar.id}><option value="h6-hev">HAVAL H6 HEV</option><option value="tiggo-8">CHERY TIGGO 8 PRO MAX</option><option value="other">طراز آخر</option></select></label><label>الفرع الأنسب<select defaultValue="mansoura"><option value="mansoura">المنصورة</option><option value="tanta">طنطا</option><option value="not-sure">أحتاج مساعدة في الاختيار</option></select></label><button className="primary-button" type="submit">جهّز الطلب <ChevronLeft size={18} /></button></form></>}</div></div>}
+      {bookingOpen && <div className="booking-overlay" role="dialog" aria-modal="true" aria-label="طلب معاينة"><div className="booking-modal"><button className="viewer-close" onClick={() => setBookingOpen(false)} aria-label="إغلاق النموذج"><X size={22} /></button>{formSent ? <div className="form-success"><span><Check size={35} /></span><p className="mono-tag accent">READY FOR CONNECTION</p><h2>تم تجهيز طلبك.</h2><p>في النسخة الحالية لا يتم إرسال البيانات خارج الموقع، حمايةً لخصوصيتك. اربط النموذج بواتساب أو CRM المعرض المعتمد لتفعيل الإرسال الفعلي.</p><button className="primary-button" onClick={() => setBookingOpen(false)}>فهمت <ChevronLeft size={18} /></button></div> : <><p className="mono-tag accent">BOOK A VISIT / STEP 01</p><h2>احجز طريقك<br />للمعاينة.</h2><p>اترك البيانات التي تساعد الفريق على تأكيد الفئة والفرع المناسبين.</p><form onSubmit={submitBooking}><label>الاسم<input required placeholder="اكتب اسمك" /></label><label>رقم الهاتف<input required inputMode="tel" placeholder="01X XXX XXXX" /></label><label>الطراز المهتم به<select defaultValue={activeCar.id}><option value="h6-hev">HAVAL H6 HEV</option><option value="tiggo-8">CHERY TIGGO 8 PRO MAX</option><option value="other">طراز آخر</option></select></label><label>الفرع الأنسب<select defaultValue="zagazig"><option value="zagazig">الزقازيق</option><option value="not-sure">أحتاج مساعدة في الاختيار</option></select></label><button className="primary-button" type="submit">جهّز الطلب <ChevronLeft size={18} /></button></form></>}</div></div>}
     </main>
   );
 }

@@ -54,7 +54,7 @@ export default function Inventory() {
   return (
     <main className="inventory-shell" dir="rtl">
       <header className="inventory-header">
-        <Link href="/" className="inventory-brand"><img src="/manus-storage/el-kamony-route-mark_798e9e48.png" alt="رمز الكموني أوتوموتيف" /><span><b>الكموني</b><small>AUTOMOTIVE</small></span></Link>
+        <Link href="/" className="inventory-brand"><img src="/manus-storage/gawish-motors-route-mark_d64638df.png" alt="رمز جاويش موتورز" /><span><b>جاويش</b><small>MOTORS</small></span></Link>
         <Link className="inventory-back" href="/"><ArrowLeft size={17} /> العودة للواجهة</Link>
       </header>
 
