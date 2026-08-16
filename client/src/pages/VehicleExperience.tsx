@@ -1,13 +1,24 @@
 /**
- * Design reminder — دفتر طريق المدينة:
- * صفحة طراز تحريريّة تقودها التمريرة. المسرح يبقى ثابتاً وتتحول اللقطة تدريجياً مع كل تمريرة؛ الصورة هي البطل والنص تعليق مقتصد لا يحجبها.
- * لا يُعرض وضع 360° حقيقياً إلا عند وجود أصل GLB/GLTF أو تسلسل دوران مرخّص.
+ * DRIVEFORM — تجربة استوديو سينمائي فخم (Cinematic Showroom Experience)
+ * 5 لقطات سينمائية فائقة السلاسة مع خلفية استوديو موحدة ومحرك تمرير 60fps
  */
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpLeft, CircleDot, Gauge, Menu, MoveLeft, Rotate3D, X } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  ArrowLeft,
+  ArrowUpLeft,
+  CircleDot,
+  Film,
+  Gauge,
+  Menu,
+  MoveLeft,
+  Pause,
+  Play,
+  X,
+  Zap,
+} from "lucide-react";
 import { Link, useParams } from "wouter";
 
-type Reel = {
+export type Reel = {
   code: string;
   title: string;
   eyebrow: string;
@@ -15,10 +26,11 @@ type Reel = {
   image: string;
   alignment: "right" | "left";
   camera: "arrival" | "sweep" | "side" | "rear" | "cabin" | "cockpit";
-  fact?: string;
+  fact: string;
+  badges: string[];
 };
 
-type VehicleFilm = {
+export type VehicleFilm = {
   slug: string;
   brand: string;
   name: string;
@@ -29,141 +41,7 @@ type VehicleFilm = {
   specification: { label: string; value: string }[];
   hero: string;
   reels: Reel[];
-  modelSrc: string | null;
-  spinFrames: string[];
-  spinLabel?: string;
-  spinHint?: string;
 };
-
-function FrameSpinViewer({ frames, alt, spinLabel, spinHint }: { frames: string[]; alt: string; spinLabel: string; spinHint: string }) {
-  const [frameIndex, setFrameIndex] = useState(0);
-  const [loadedFrames, setLoadedFrames] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [departingFrame, setDepartingFrame] = useState<number | null>(null);
-  const [sparseTransition, setSparseTransition] = useState(0);
-  const [travelDirection, setTravelDirection] = useState<1 | -1>(1);
-  const dragStart = useRef({ x: 0, position: 0 });
-  const lastDrag = useRef({ x: 0, time: 0, velocity: 0 });
-  const targetPosition = useRef(0);
-  const displayedPosition = useRef(0);
-  const renderedFrame = useRef(0);
-  const animationFrame = useRef<number | null>(null);
-  const frameCount = frames.length;
-  const wrapFrame = (index: number) => ((index % frameCount) + frameCount) % frameCount;
-  const isSparseSequence = frameCount < 18;
-  // تبقى اللفة الكاملة قريبة من 288px؛ تُباعد الزوايا القليلة حتى لا تدور السيارة بسرعة مضلّلة.
-  const pixelsPerFrame = frameCount >= 18 ? 8 : Math.max(32, Math.round(288 / frameCount));
-
-  useEffect(() => {
-    let cancelled = false;
-    let complete = 0;
-    const preload = frames.map((source) => {
-      const image = new Image();
-      const markComplete = () => {
-        complete += 1;
-        if (!cancelled) setLoadedFrames(complete);
-      };
-      image.decoding = "async";
-      image.onload = markComplete;
-      image.onerror = markComplete;
-      image.src = source;
-      return image;
-    });
-
-    return () => {
-      cancelled = true;
-      preload.forEach((image) => { image.onload = null; image.onerror = null; });
-    };
-  }, [frames]);
-
-  useEffect(() => () => {
-    if (animationFrame.current !== null) cancelAnimationFrame(animationFrame.current);
-  }, []);
-
-  const revealFrame = (nextFrame: number) => {
-    const wrapped = wrapFrame(nextFrame);
-    if (wrapped === renderedFrame.current) return;
-    if (isSparseSequence) {
-      const rawDistance = wrapped - renderedFrame.current;
-      const shortestDistance = rawDistance > frameCount / 2 ? rawDistance - frameCount : rawDistance < -frameCount / 2 ? rawDistance + frameCount : rawDistance;
-      setTravelDirection(shortestDistance >= 0 ? 1 : -1);
-      setDepartingFrame(renderedFrame.current);
-      setSparseTransition((transition) => transition + 1);
-    }
-    renderedFrame.current = wrapped;
-    setFrameIndex(wrapped);
-  };
-
-  const settleToTarget = () => {
-    if (animationFrame.current !== null) return;
-    const animate = () => {
-      const distance = targetPosition.current - displayedPosition.current;
-      if (Math.abs(distance) < 0.012) {
-        displayedPosition.current = targetPosition.current;
-        revealFrame(Math.round(displayedPosition.current));
-        animationFrame.current = null;
-        return;
-      }
-      displayedPosition.current += distance * (isSparseSequence ? 0.13 : 0.19);
-      revealFrame(Math.round(displayedPosition.current));
-      animationFrame.current = requestAnimationFrame(animate);
-    };
-    animationFrame.current = requestAnimationFrame(animate);
-  };
-
-  const nudge = (amount: number) => {
-    targetPosition.current = displayedPosition.current + amount;
-    settleToTarget();
-  };
-
-  return (
-    <div
-      className={`${dragging ? "frame-spin-viewer is-dragging" : "frame-spin-viewer"}${loadedFrames < frameCount ? " is-preloading" : ""}`}
-      role="application"
-      tabIndex={0}
-      aria-label="عارض دوران 360 درجة. اسحب أفقياً لتدوير السيارة، أو استخدم سهمي اليمين واليسار."
-      onPointerDown={(event) => {
-        event.currentTarget.setPointerCapture(event.pointerId);
-        targetPosition.current = displayedPosition.current;
-        dragStart.current = { x: event.clientX, position: displayedPosition.current };
-        lastDrag.current = { x: event.clientX, time: performance.now(), velocity: 0 };
-        setDragging(true);
-      }}
-      onPointerMove={(event) => {
-        if (!dragging) return;
-        const now = performance.now();
-        const elapsed = Math.max(now - lastDrag.current.time, 1);
-        const deltaFrames = (lastDrag.current.x - event.clientX) / pixelsPerFrame;
-        lastDrag.current = {
-          x: event.clientX,
-          time: now,
-          velocity: lastDrag.current.velocity * 0.62 + (deltaFrames / elapsed) * 0.38,
-        };
-        targetPosition.current = dragStart.current.position + (dragStart.current.x - event.clientX) / pixelsPerFrame;
-        settleToTarget();
-      }}
-      onPointerUp={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-        const inertia = isSparseSequence
-          ? Math.max(-0.45, Math.min(0.45, lastDrag.current.velocity * 40))
-          : Math.max(-4.5, Math.min(4.5, lastDrag.current.velocity * 135));
-        targetPosition.current += inertia;
-        settleToTarget();
-        setDragging(false);
-      }}
-      onPointerCancel={() => { targetPosition.current = displayedPosition.current; setDragging(false); }}
-      onKeyDown={(event) => {
-        if (event.key === "ArrowRight") { event.preventDefault(); nudge(1); }
-        if (event.key === "ArrowLeft") { event.preventDefault(); nudge(-1); }
-      }}
-    >
-      {isSparseSequence && departingFrame !== null && <img key={`departing-${sparseTransition}`} className={`spin-frame sparse-spin-frame sparse-spin-departing direction-${travelDirection}`} src={frames[departingFrame]} alt="" draggable={false} aria-hidden="true" />}
-      <img key={`active-${isSparseSequence ? sparseTransition : frameIndex}`} className={`spin-frame${isSparseSequence ? ` sparse-spin-frame sparse-spin-arriving direction-${travelDirection}` : ""}`} src={frames[frameIndex]} alt={alt} draggable={false} />
-      <div className="spin-hud" aria-hidden="true"><span>{spinLabel}</span><b>{String(frameIndex + 1).padStart(2, "0")} / {String(frameCount).padStart(2, "0")}</b></div>
-      <div className="spin-drag-hint" aria-hidden="true"><Rotate3D size={17} /><span>{loadedFrames < frameCount ? "يجري تجهيز الدوران" : spinHint}</span></div>
-    </div>
-  );
-}
 
 const vehicles: Record<string, VehicleFilm> = {
   "h6-hev": {
@@ -173,15 +51,8 @@ const vehicles: Record<string, VehicleFilm> = {
     category: "SUV هجينة",
     routeCode: "DFM / H6 / REEL-01",
     price: "السعر مرجعي — يُؤكّد مع الفرع",
-    source: "صور ومواصفات مرجعية من المادة الرسمية للطراز، ويشمل العارض ست زوايا خارجية رسمية. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
+    source: "صور ومواصفات مرجعية من المادة الرسمية للطراز الصادر من الوكيل المعتمد.",
     hero: "/manus-storage/haval-h6-hev-official_edb3204f.jpg",
-    modelSrc: null,
-    spinFrames: [
-      "/manus-storage/haval-h6-hev-spin-01_89b2eb25.png", "/manus-storage/haval-h6-hev-spin-02_6976bce3.png", "/manus-storage/haval-h6-hev-spin-03_ccadf4f9.png",
-      "/manus-storage/haval-h6-hev-spin-04_968225b2.png", "/manus-storage/haval-h6-hev-spin-05_d0cb470d.png", "/manus-storage/haval-h6-hev-spin-06_d7c2ca05.png",
-    ],
-    spinLabel: "دوران 360° / 6 زوايا رسمية",
-    spinHint: "اسحب بهدوء عبر الزوايا الست",
     specification: [
       { label: "الفئة", value: "SUV هجينة" },
       { label: "القوة", value: "240 حصان" },
@@ -193,11 +64,61 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الوصول", title: "الواجهة أولاً. ثم نتحرك معها.", copy: "لقطة واسعة تلتقط الوقفة كاملة قبل أن تتقدم الكاميرا نحو الخطوط الأمامية.", image: "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg", alignment: "right", camera: "arrival", fact: "FRONT / REFERENCE MODEL" },
-      { code: "REEL 02", eyebrow: "الجانب", title: "ثم تنزلق الكاميرا بمحاذاة الخط.", copy: "نغادر الواجهة إلى زاوية جانبية رسمية؛ حركة واحدة تقرأ امتداد الجسم بهدوء.", image: "/manus-storage/haval-h6-hev-spin-02_6976bce3.png", alignment: "left", camera: "side", fact: "SIDE / OFFICIAL ANGLE" },
-      { code: "REEL 03", eyebrow: "الخلف", title: "وتكمل الدورة عند التوقيع الخلفي.", copy: "لقطة خارجية رسمية تكمل مسار الكاميرا حول السيارة قبل دخول المقصورة.", image: "/manus-storage/haval-h6-hev-spin-04_968225b2.png", alignment: "right", camera: "rear", fact: "REAR / OFFICIAL ANGLE" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "ثم يدخل المشهد إلى الداخل.", copy: "بعد قراءة الجسم، تتسع اللقطة للمقاعد والشاشة والمساحة التي ترافق الطريق.", image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg", alignment: "left", camera: "cabin", fact: "CABIN / WIDE ANGLE" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "النهاية عند ما تراه أمامك.", copy: "نختم قريباً من لوحة القيادة وعناصر التحكم، قبل أن تختار موعد المعاينة.", image: "/manus-storage/haval-h6-dashboard_49304907.jpg", alignment: "right", camera: "cockpit", fact: "COCKPIT / REFERENCE" },
+      {
+        code: "01",
+        eyebrow: "الواجهة",
+        title: "الواجهة أولاً. وقفة واثقة وحضور متقدم.",
+        copy: "لقطة أمامية شاملة تستعرض مقدمة الهيكل والشبك المتطور مع منظومة الإضاءة Matrix LED.",
+        image: "/manus-storage/haval-h6-exterior-wide_25dc7605.jpg",
+        alignment: "right",
+        camera: "arrival",
+        fact: "FRONT / MATRIX LED",
+        badges: ["240 حصان", "Matrix LED", "منظومة هجينة"],
+      },
+      {
+        code: "02",
+        eyebrow: "الجانب",
+        title: "انزلاق انسيابي بمحاذاة خط الكتف.",
+        copy: "زاوية جانبية متزنة توضح تناسق الأبعاد والجنوط الرياضية مقاس 19 بوصة مع امتداد السقف.",
+        image: "/manus-storage/haval-h6-hev-spin-02_6976bce3.png",
+        alignment: "left",
+        camera: "side",
+        fact: "SIDE / 19\" ALLOYS",
+        badges: ["جنوط 19\"", "خط انسيابي", "زجاج معزول"],
+      },
+      {
+        code: "03",
+        eyebrow: "الخلف",
+        title: "توقيع ضوئي متصل وهوية عريضة.",
+        copy: "إطلالة خلفية رياضية تُبرز شريط الإضاءة الممتد وتفاصيل المصد وشعار الهايبرد المميز.",
+        image: "/manus-storage/haval-h6-hev-spin-04_968225b2.png",
+        alignment: "right",
+        camera: "rear",
+        fact: "REAR / LED LIGHTBAR",
+        badges: ["إضاءة متصلة", "شعار HEV", "حساسات 360°"],
+      },
+      {
+        code: "04",
+        eyebrow: "المقصورة",
+        title: "مساحة رحبة محاطة بالراحة والهدوء.",
+        copy: "المقاعد المكسوة بالجلد الفاخر، وسقف بانورامي يغمر المقصورة بالضوء الطبيعي طوال الطريق.",
+        image: "/manus-storage/haval-h6-interior-wide_4ad7a927.jpg",
+        alignment: "left",
+        camera: "cabin",
+        fact: "CABIN / PANORAMIC ROOF",
+        badges: ["سقف بانورامي", "جلد فاخر", "تهوية مقاعد"],
+      },
+      {
+        code: "05",
+        eyebrow: "القيادة",
+        title: "التحكم الكامل أمام ناظريك.",
+        copy: "لوحة قيادة ذكية بشاشات مزدوجة عالية الوضوح تدعم أحدث أنظمة مساعدة السائق المتقدمة.",
+        image: "/manus-storage/haval-h6-dashboard_49304907.jpg",
+        alignment: "right",
+        camera: "cockpit",
+        fact: "COCKPIT / 12.3\" SCREEN",
+        badges: ["شاشة 12.3\"", "نظام ADAS L2", "شاحن لاسلكي"],
+      },
     ],
   },
   "tiggo-8": {
@@ -209,17 +130,6 @@ const vehicles: Record<string, VehicleFilm> = {
     price: "السعر مرجعي — يُؤكّد مع الفرع",
     source: "صور ومواصفات مرجعية من المادة الرسمية للطراز. الفئة واللون والتوفر تُؤكّدها إدارة المعرض قبل الحجز.",
     hero: "/manus-storage/chery-t8-banner_72ed49f7.jpg",
-    modelSrc: null,
-    spinFrames: [
-      "/manus-storage/tiggo8pro-black-01_a81e2626.jpg", "/manus-storage/tiggo8pro-black-02_f2349b61.jpg", "/manus-storage/tiggo8pro-black-03_1ea50fc3.jpg", "/manus-storage/tiggo8pro-black-04_e5b2dbf9.jpg", "/manus-storage/tiggo8pro-black-05_186bb2c7.jpg", "/manus-storage/tiggo8pro-black-06_96806d72.jpg",
-      "/manus-storage/tiggo8pro-black-07_640cb216.jpg", "/manus-storage/tiggo8pro-black-08_85eba19f.jpg", "/manus-storage/tiggo8pro-black-09_9e831b18.jpg", "/manus-storage/tiggo8pro-black-10_40ae960b.jpg", "/manus-storage/tiggo8pro-black-11_b96be694.jpg", "/manus-storage/tiggo8pro-black-12_5e108d98.jpg",
-      "/manus-storage/tiggo8pro-black-13_7916f2c3.jpg", "/manus-storage/tiggo8pro-black-14_3d0c2fc0.jpg", "/manus-storage/tiggo8pro-black-15_4048277e.jpg", "/manus-storage/tiggo8pro-black-16_d0247a50.jpg", "/manus-storage/tiggo8pro-black-17_f2c4cb6b.jpg", "/manus-storage/tiggo8pro-black-18_f4ec410f.jpg",
-      "/manus-storage/tiggo8pro-black-19_3f0188e0.jpg", "/manus-storage/tiggo8pro-black-20_bb9419a8.jpg", "/manus-storage/tiggo8pro-black-21_79764af2.jpg", "/manus-storage/tiggo8pro-black-22_3b8feb6d.jpg", "/manus-storage/tiggo8pro-black-23_9225cdee.jpg", "/manus-storage/tiggo8pro-black-24_4b5140ed.jpg",
-      "/manus-storage/tiggo8pro-black-25_2513da0c.jpg", "/manus-storage/tiggo8pro-black-26_1319d4de.jpg", "/manus-storage/tiggo8pro-black-27_0cc1d481.jpg", "/manus-storage/tiggo8pro-black-28_04cba39c.jpg", "/manus-storage/tiggo8pro-black-29_c8903146.jpg", "/manus-storage/tiggo8pro-black-30_97f4039c.jpg",
-      "/manus-storage/tiggo8pro-black-31_415dec5b.jpg", "/manus-storage/tiggo8pro-black-32_cc879c50.jpg", "/manus-storage/tiggo8pro-black-33_8318c542.jpg", "/manus-storage/tiggo8pro-black-34_177a8eb3.jpg", "/manus-storage/tiggo8pro-black-35_c9f26389.jpg", "/manus-storage/tiggo8pro-black-36_78806ae5.jpg",
-    ],
-    spinLabel: "دوران 360° / 36 لقطة رسمية",
-    spinHint: "اسحب لتدور السيارة",
     specification: [
       { label: "الفئة", value: "SUV — 7 مقاعد" },
       { label: "القوة", value: "197 حصان" },
@@ -231,11 +141,61 @@ const vehicles: Record<string, VehicleFilm> = {
       { label: "حالة التوفر", value: "تُؤكّد مع الفرع" },
     ],
     reels: [
-      { code: "REEL 01", eyebrow: "الواجهة", title: "من المقدمة يبدأ المشهد.", copy: "لقطة أمامية صريحة؛ ثم تتحرك الكاميرا حول الكتلة بدلاً من تبديل بانرات منفصلة.", image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg", alignment: "right", camera: "arrival", fact: "FRONT / EXTERIOR" },
-      { code: "REEL 02", eyebrow: "الخط الجانبي", title: "بعد الواجهة، يطول الخط.", copy: "انزلاق بصري هادئ نحو النِسَب والامتداد الجانبي قبل أن نصل إلى الخلف.", image: "/manus-storage/tiggo8pro-black-15_4048277e.jpg", alignment: "left", camera: "side", fact: "SIDE / OFFICIAL SPIN" },
-      { code: "REEL 03", eyebrow: "الخلف", title: "من الجانب إلى توقيع الخلف.", copy: "اللقطة التالية تكمل الدورة حول السيارة وتُظهر الكتلة الخلفية بوضوح.", image: "/manus-storage/tiggo8pro-black-05_186bb2c7.jpg", alignment: "right", camera: "rear", fact: "REAR / OFFICIAL SPIN" },
-      { code: "REEL 04", eyebrow: "المقصورة", title: "ومن الخارج، ندخل إلى المساحة.", copy: "تتسع الكاميرا للمقصورة بعد أن يكتمل مسار الهيكل الخارجي.", image: "/manus-storage/chery-t8-interior-wide_cdbbae1e.jpg", alignment: "left", camera: "cabin", fact: "CABIN / INTERIOR" },
-      { code: "REEL 05", eyebrow: "القيادة", title: "النهاية عند الطريق أمامك.", copy: "نختم عند لوحة القيادة؛ آخر لقطة قبل أن تختار موعد معاينتك.", image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg", alignment: "right", camera: "cockpit", fact: "COCKPIT / REFERENCE" },
+      {
+        code: "01",
+        eyebrow: "الواجهة",
+        title: "شبك ألماسي مهيب ومصابيح LED ذكية.",
+        copy: "حضور قيادي قوي بمقدمة جريئة وشعار مضيء ولمسات كرومية دقيقة.",
+        image: "/manus-storage/chery-t8-exterior-front_16f65ecd.jpg",
+        alignment: "right",
+        camera: "arrival",
+        fact: "FRONT / DIAMOND GRILLE",
+        badges: ["شبك ألماسي", "197 حصان", "Matrix LED"],
+      },
+      {
+        code: "02",
+        eyebrow: "الجانب",
+        title: "طول مهيب يمتد لأكثر من 4.7 متر.",
+        copy: "انسيابية ديناميكية مدروسة توفر ثباتاً فائقاً ومساحة داخلية استثنائية لسبعة ركاب.",
+        image: "/manus-storage/chery-t8-exterior-side_8d0a9686.jpg",
+        alignment: "left",
+        camera: "side",
+        fact: "SIDE / 4,722MM LENGTH",
+        badges: ["طول 4.72 متر", "7 مقاعد", "عزل صوتي"],
+      },
+      {
+        code: "03",
+        eyebrow: "الخلف",
+        title: "إضاءة ثلاثية الأبعاد ومخارج عادم رباعية.",
+        copy: "هيبة رياضية متكاملة من الخلف تمنح الطراز بصمة بصرية لا تخطئها العين في أي طريق.",
+        image: "/manus-storage/chery-t8-exterior-rear_9e1acbf8.jpg",
+        alignment: "right",
+        camera: "rear",
+        fact: "REAR / 3D TAILLIGHTS",
+        badges: ["عوادم رباعية", "إضاءة 3D", "باب خلفي ذكي"],
+      },
+      {
+        code: "04",
+        eyebrow: "المقصورة",
+        title: "فخامة متكاملة وتوزيع مريح لثلاثة صفوف.",
+        copy: "مقاعد جلدية مريحة مع تحكم مناخي مستقل للصفوف الخلفية ومساحات تخزين واسعة.",
+        image: "/manus-storage/chery-t8-seats_0a82b3e5.jpg",
+        alignment: "left",
+        camera: "cabin",
+        fact: "CABIN / 3-ROW SEATING",
+        badges: ["7 مقاعد جلد", "تكييف مستقل", "إضاءة محيطية"],
+      },
+      {
+        code: "05",
+        eyebrow: "القيادة",
+        title: "شاشة مزدوجة مقاس 24.6 بوصة ونظام صوتي Sony.",
+        copy: "قمرة قيادة متطورة بالكامل تجمع بين العدادات والترفيه في شاشة منحنية فائقة النقاء.",
+        image: "/manus-storage/chery-t8-dashboard_e46e2534.jpg",
+        alignment: "right",
+        camera: "cockpit",
+        fact: "COCKPIT / DUAL 24.6\" SCREEN",
+        badges: ["شاشة 24.6\"", "صوت Sony", "شحن لاسلكي"],
+      },
     ],
   },
 };
@@ -248,112 +208,401 @@ export default function VehicleExperience() {
   const params = useParams<{ slug: string }>();
   const vehicleKey = params.slug === "tiggo-8-pro-max" ? "tiggo-8" : params.slug;
   const vehicle = vehicles[vehicleKey] ?? vehicles["h6-hev"];
-  const [filmProgress, setFilmProgress] = useState(0);
-  const [spinOpen, setSpinOpen] = useState(false);
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const filmRef = useRef<HTMLElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0);
+  const activeReelRef = useRef(0);
+  const autoPlayRaf = useRef<number | null>(null);
 
-  const hasInteractiveSpin = vehicle.spinFrames.length >= 6;
-  const boundedProgress = Math.min(vehicle.reels.length - 1, Math.max(0, filmProgress));
-  const currentReelIndex = Math.floor(boundedProgress);
-  const nextReelIndex = Math.min(vehicle.reels.length - 1, currentReelIndex + 1);
-  const reelTransition = boundedProgress - currentReelIndex;
-  // القطع السينمائي بثلاث مراحل: إخفاء اللقطة المغادرة، لحظة ستر قصيرة، ثم كشف اللقطة التالية.
-  // لا تُعرض سيارتان معاً حتى لا يتحول مرور الكاميرا إلى تعرّض مزدوج.
-  const cutProgress = Math.min(1, Math.max(0, (reelTransition - 0.22) / 0.56));
-  const currentImageOpacity = 1 - Math.min(1, cutProgress / 0.34);
-  const nextImageOpacity = Math.min(1, Math.max(0, (cutProgress - 0.62) / 0.38));
-  const transitionVeil = Math.sin(cutProgress * Math.PI);
-  const activeReel = Math.min(vehicle.reels.length - 1, Math.round(boundedProgress));
-  const storyReel = vehicle.reels[nextImageOpacity < 0.5 ? currentReelIndex : nextReelIndex];
-  const currentReel = vehicle.reels[currentReelIndex];
-  const nextReel = vehicle.reels[nextReelIndex];
+  const reelCount = vehicle.reels.length;
 
+  // === محرك التمرير عالي الأداء — يكتب مباشرة في DOM لتجنب إعادة التصيير بطاقة 60fps ===
   useEffect(() => {
-    let frame: number | null = null;
-    const updateFilmProgress = () => {
-      const film = filmRef.current;
-      if (!film) return;
-      const travelDistance = Math.max(film.offsetHeight - window.innerHeight, 1);
-      const travelled = Math.max(0, Math.min(travelDistance, -film.getBoundingClientRect().top));
-      const nextProgress = (travelled / travelDistance) * (vehicle.reels.length - 1);
-      setFilmProgress((previous) => Math.abs(previous - nextProgress) < 0.001 ? previous : nextProgress);
+    let raf: number | null = null;
+    const stage = stageRef.current;
+    const film = filmRef.current;
+    if (!stage || !film) return;
+
+    const update = () => {
+      const scrollH = Math.max(film.offsetHeight - window.innerHeight, 1);
+      const topOffset = Math.max(0, Math.min(scrollH, -film.getBoundingClientRect().top));
+      const p = (topOffset / scrollH) * (reelCount - 1);
+      progressRef.current = p;
+
+      const boundedProgress = Math.min(reelCount - 1, Math.max(0, p));
+      const activeIdx = Math.min(reelCount - 1, Math.round(boundedProgress));
+
+      const currentIdx = Math.floor(boundedProgress);
+      const nextIdx = Math.min(reelCount - 1, currentIdx + 1);
+      const transition = boundedProgress - currentIdx;
+
+      // 1. تحديث طبقات صور السيارات (انتقال سلس وناعم)
+      const layers = stage.querySelectorAll<HTMLElement>(".cine-shot-layer");
+      layers.forEach((layer, i) => {
+        if (i === currentIdx) {
+          const op = 1 - transition * 0.9;
+          const sc = 1.0 + (1 - transition) * 0.025;
+          layer.style.opacity = String(op);
+          layer.style.transform = `scale(${sc})`;
+          layer.style.zIndex = "2";
+        } else if (i === nextIdx && nextIdx !== currentIdx) {
+          const op = Math.max(0, transition * 1.15 - 0.05);
+          const sc = 1.03 - transition * 0.03;
+          layer.style.opacity = String(op);
+          layer.style.transform = `scale(${sc})`;
+          layer.style.zIndex = "3";
+        } else {
+          layer.style.opacity = "0";
+          layer.style.zIndex = "1";
+        }
+      });
+
+      // 2. تحديث بطاقات المعلومات (ظهور ناعم للبطاقة النشطة فقط)
+      const cards = stage.querySelectorAll<HTMLElement>(".cine-hud-card");
+      cards.forEach((card, i) => {
+        const dist = boundedProgress - i;
+        const absDist = Math.abs(dist);
+        if (absDist < 0.65) {
+          const opacity = Math.max(0, 1 - absDist * 2.2);
+          const ty = dist * 26;
+          card.style.opacity = String(opacity);
+          card.style.transform = `translate3d(0, ${ty}px, 0)`;
+          card.style.pointerEvents = i === activeIdx ? "auto" : "none";
+        } else {
+          card.style.opacity = "0";
+          card.style.pointerEvents = "none";
+        }
+      });
+
+      // 3. تحديث شريط التايم لاين والأزرار
+      const playhead = stage.querySelector<HTMLElement>(".dock-playhead");
+      if (playhead) {
+        const percent = Math.min(100, Math.max(0, (boundedProgress / (reelCount - 1)) * 100));
+        playhead.style.width = `${percent}%`;
+      }
+
+      const chapterBtns = stage.querySelectorAll<HTMLElement>(".chapter-btn");
+      chapterBtns.forEach((btn, i) => {
+        btn.classList.toggle("is-active", i === activeIdx);
+      });
+
+      // 4. تحديث نصوص الـ HUD العلوي
+      if (activeIdx !== activeReelRef.current) {
+        activeReelRef.current = activeIdx;
+        const sceneTitle = stage.querySelector<HTMLElement>(".hud-scene-title");
+        if (sceneTitle && vehicle.reels[activeIdx]) {
+          sceneTitle.textContent = `SCENE ${vehicle.reels[activeIdx].code} / ${vehicle.reels[activeIdx].eyebrow}`;
+        }
+        const counterBox = stage.querySelector<HTMLElement>(".hud-counter-box");
+        if (counterBox) {
+          counterBox.textContent = `${String(activeIdx + 1).padStart(2, "0")} / ${String(
+            reelCount
+          ).padStart(2, "0")}`;
+        }
+      }
     };
+
     const onScroll = () => {
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateFilmProgress);
+      if (raf !== null) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
     };
-    updateFilmProgress();
+
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
-      if (frame !== null) cancelAnimationFrame(frame);
+      if (raf !== null) cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [vehicle.slug]);
+  }, [vehicle.slug, reelCount]);
+
+  // التشغيل التلقائي للمشهد
+  const togglePlay = useCallback(() => {
+    setIsPlaying((prev) => {
+      if (!prev) {
+        const film = filmRef.current;
+        if (film) {
+          const rect = film.getBoundingClientRect();
+          if (rect.top < -50 || rect.top > window.innerHeight) {
+            film.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      }
+      return !prev;
+    });
+  }, []);
 
   useEffect(() => {
-    setFilmProgress(0);
-    setSpinOpen(false);
+    if (!isPlaying) {
+      if (autoPlayRaf.current !== null) cancelAnimationFrame(autoPlayRaf.current);
+      autoPlayRaf.current = null;
+      return;
+    }
+    const film = filmRef.current;
+    if (!film) return;
+    const filmTop = film.offsetTop;
+    const filmH = film.offsetHeight - window.innerHeight;
+    const startProgress = progressRef.current / (reelCount - 1);
+    const duration = (1 - startProgress) * 16000;
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      const t = Math.min(1, (now - startTime) / Math.max(duration, 2000));
+      const target = filmTop + (startProgress + t * (1 - startProgress)) * filmH;
+      window.scrollTo({ top: target, behavior: "auto" });
+      if (t < 1) {
+        autoPlayRaf.current = requestAnimationFrame(animate);
+      } else {
+        setIsPlaying(false);
+      }
+    };
+    autoPlayRaf.current = requestAnimationFrame(animate);
+
+    const stop = () => setIsPlaying(false);
+    window.addEventListener("wheel", stop, { once: true, passive: true });
+    window.addEventListener("touchstart", stop, { once: true, passive: true });
+    return () => {
+      if (autoPlayRaf.current !== null) cancelAnimationFrame(autoPlayRaf.current);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+    };
+  }, [isPlaying, reelCount]);
+
+  useEffect(() => {
+    setIsPlaying(false);
   }, [vehicle.slug]);
 
+  const jumpToReel = (i: number) => {
+    setIsPlaying(false);
+    document.getElementById(`marker-reel-${i}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <main className="product-experience" dir="rtl">
+    <main className="product-experience cinematic-experience-root" dir="rtl">
+      {/* 1. خلفية الاستوديو السينمائي الثابتة بالكامل */}
+      <div className="cine-ambient-backdrop" aria-hidden="true">
+        <div className="cine-studio-grid" />
+      </div>
+
+      {/* الهيدر العلوي */}
       <header className="product-header">
-        <Link href="/" className="product-brand" aria-label="العودة لدرايف فورم"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="رمز درايف فورم" /><span><b>درايف فورم</b><small>DRIVEFORM</small></span></Link>
+        <Link href="/" className="product-brand" aria-label="العودة لدرايف فورم">
+          <img src="/manus-storage/driveform-route-mark_a9149408.png" alt="رمز درايف فورم" />
+          <span>
+            <b>درايف فورم</b>
+            <small>DRIVEFORM SHOWROOM</small>
+          </span>
+        </Link>
         <nav className={menuOpen ? "product-nav open" : "product-nav"} aria-label="تنقل صفحة الطراز">
-          <button onClick={() => { scrollTo("film"); setMenuOpen(false); }}>رحلة السيارة</button>
+          <button onClick={() => { scrollTo("film"); setMenuOpen(false); }}>استوديو السيارة</button>
           <button onClick={() => { scrollTo("specs"); setMenuOpen(false); }}>المواصفات</button>
           <button onClick={() => { scrollTo("appointment"); setMenuOpen(false); }}>المعاينة</button>
         </nav>
-        <div className="product-header-actions"><Link href="/" className="back-fleet"><ArrowLeft size={17} /> كل السيارات</Link><button className="product-menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح قائمة صفحة الطراز">{menuOpen ? <X size={21} /> : <Menu size={22} />}</button></div>
+        <div className="product-header-actions">
+          <Link href="/" className="back-fleet">
+            <ArrowLeft size={17} /> كل السيارات
+          </Link>
+          <button
+            className="product-menu-toggle"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="فتح القائمة"
+          >
+            {menuOpen ? <X size={21} /> : <Menu size={22} />}
+          </button>
+        </div>
       </header>
 
+      {/* 2. قسم المقدمة */}
       <section className="product-intro" id="top">
         <div className="product-intro-copy">
-          <p className="route-id"><CircleDot size={13} /> {vehicle.routeCode}</p>
+          <p className="route-id">
+            <CircleDot size={13} /> {vehicle.routeCode}
+          </p>
           <p className="product-brand-line">{vehicle.brand}</p>
           <h1>{vehicle.name}</h1>
           <p className="product-category">{vehicle.category}</p>
-          <p className="product-intro-lead">خمس لقطات رسمية؛ من الوصول إلى المقصورة، ثم قرار المعاينة.</p>
-          <div className="product-intro-actions"><button className="signal-button" onClick={() => scrollTo("film")}>ابدأ الاستكشاف <MoveLeft size={17} /></button>{hasInteractiveSpin && <button className="quiet-button" onClick={() => setSpinOpen(true)}><Rotate3D size={17} /> استكشف 360°</button>}</div>
+          <p className="product-intro-lead">
+            استوديو سينمائي متكامل يستعرض تفاصيل السيارة من المقدمة إلى أدق تفاصيل المقصورة، لقرار واثق قبل المعاينة.
+          </p>
+          <div className="product-intro-actions">
+            <button className="signal-button" onClick={() => scrollTo("film")}>
+              <Film size={16} /> دخول الاستوديو <MoveLeft size={17} />
+            </button>
+          </div>
           <p className="product-price-note">{vehicle.price}</p>
         </div>
-        <div className="product-intro-frame"><img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name} — صورة رسمية مرجعية`} /><span>بداية المشهد / 01</span><i /></div>
-      </section>
-
-      <section ref={filmRef} className="film-section film-section-continuous" id="film" aria-label={`رحلة ${vehicle.brand} ${vehicle.name} السينمائية`} style={{ minHeight: `${vehicle.reels.length * 100}svh` }}>
-        <div className={`cinematic-film-stage copy-${storyReel.alignment}`}>
-          <img className={`cinematic-stage-image camera-${currentReel.camera} is-current`} src={currentReel.image} alt={`${vehicle.brand} ${vehicle.name} — ${currentReel.eyebrow}، صورة رسمية مرجعية`} loading="eager" style={{ opacity: currentImageOpacity, filter: `saturate(${0.94 - transitionVeil * 0.06}) contrast(1.06) brightness(${0.92 - transitionVeil * 0.04}) blur(${transitionVeil * 0.7}px)`, transform: `scale(${1.026 + reelTransition * 0.014}) translate3d(${-reelTransition * 0.5}%, ${reelTransition * 0.12}%, 0)` }} />
-          {nextReelIndex !== currentReelIndex && <img className={`cinematic-stage-image camera-${nextReel.camera} is-next`} src={nextReel.image} alt="" aria-hidden="true" loading="eager" style={{ opacity: nextImageOpacity, filter: `saturate(${0.94 - transitionVeil * 0.06}) contrast(1.06) brightness(${0.92 - transitionVeil * 0.04}) blur(${transitionVeil * 0.7}px)`, transform: `scale(${1.048 - nextImageOpacity * 0.02}) translate3d(${(1 - nextImageOpacity) * 0.65}%, ${(1 - nextImageOpacity) * -0.16}%, 0)` }} />}
-          <div className="cinematic-cut" aria-hidden="true" style={{ opacity: transitionVeil * 0.98 }} />
-          <div className="cinematic-stage-scrim" aria-hidden="true" />
-          <div className="cinematic-driveform-stamp" aria-hidden="true"><img src="/manus-storage/driveform-route-mark_a9149408.png" alt="" /><span>DRIVEFORM / MODEL FILE</span></div>
-          <div className="cinematic-stage-meta"><span>{storyReel.code}</span><span>{vehicle.brand} / {vehicle.name}</span><span>{String(activeReel + 1).padStart(2, "0")} / {String(vehicle.reels.length).padStart(2, "0")}</span></div>
-          <div className="cinematic-stage-copy" key={storyReel.code}>
-            <p><span>{storyReel.eyebrow}</span><i aria-hidden="true" /> حركة كاميرا</p>
-            <h2>{storyReel.title}</h2>
-            <span>{storyReel.copy}</span>
-            <small>مؤشر قرار / {storyReel.fact}</small>
-          </div>
-          {hasInteractiveSpin && activeReel === 0 && <button className="cinematic-spin-entry" onClick={() => setSpinOpen(true)}><Rotate3D size={15} /> افتح دوران 360°</button>}
-          <div className="cinematic-film-route" aria-label={`تنقل لقطات ${vehicle.brand} ${vehicle.name}`}><span style={{ transform: `scaleX(${(boundedProgress + 1) / vehicle.reels.length})` }} /><div>{vehicle.reels.map((item, routeIndex) => <button key={item.code} className={routeIndex === activeReel ? "active" : ""} onClick={() => document.getElementById(`reel-${routeIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" })} aria-current={routeIndex === activeReel ? "step" : undefined} aria-label={`الانتقال إلى ${item.eyebrow}`}>{String(routeIndex + 1).padStart(2, "0")}</button>)}</div></div>
+        <div className="product-intro-frame">
+          <img src={vehicle.hero} alt={`${vehicle.brand} ${vehicle.name}`} />
         </div>
-        <div className="cinematic-film-markers" aria-hidden="true">{vehicle.reels.map((reel, index) => <div id={`reel-${index}`} className="cinematic-film-marker" key={reel.code} />)}</div>
       </section>
 
-      {hasInteractiveSpin && spinOpen && <div className="spin-overlay" role="dialog" aria-modal="true" aria-label={`دوران ${vehicle.brand} ${vehicle.name} بزاوية 360 درجة`}><div className="spin-dialog"><div className="spin-dialog-header"><p>{vehicle.spinLabel}</p><button onClick={() => setSpinOpen(false)} aria-label="إغلاق عارض الدوران"><X size={20} /></button></div><FrameSpinViewer frames={vehicle.spinFrames} alt={`${vehicle.brand} ${vehicle.name} — دوران خارجي 360 درجة من صور رسمية`} spinLabel={vehicle.spinLabel ?? "دوران 360° / مصدر رسمي"} spinHint={vehicle.spinHint ?? "اسحب لتدور السيارة"} /></div></div>}
+      {/* 3. المسرح السينمائي التفاعلي (Sticky Stage) */}
+      <section
+        ref={filmRef}
+        className="cine-film-section"
+        id="film"
+        style={{ minHeight: `${reelCount * 110}svh` }}
+      >
+        <div ref={stageRef} className="cine-stage-sticky">
+          {/* طبقات صور زوايا السيارة في الاستوديو */}
+          <div className="cine-shots-wrapper">
+            {vehicle.reels.map((reel, i) => (
+              <div
+                key={reel.code}
+                className="cine-shot-layer"
+                style={{ opacity: i === 0 ? 1 : 0 }}
+              >
+                <img
+                  src={reel.image}
+                  alt={`${vehicle.brand} ${vehicle.name} — ${reel.eyebrow}`}
+                  loading={i < 2 ? "eager" : "lazy"}
+                />
+              </div>
+            ))}
+          </div>
 
+          {/* تظليل وإضاءة الاستوديو السينمائي */}
+          <div className="cine-stage-vignette" aria-hidden="true" />
+
+          {/* شريط معلومات المخرج العلوي (HUD) */}
+          <div className="cine-hud-top" aria-hidden="true">
+            <div className="hud-rec-badge">
+              <span className="hud-rec-dot" />
+              <span>STUDIO CAM</span>
+            </div>
+            <span className="hud-scene-title">
+              SCENE {vehicle.reels[0].code} / {vehicle.reels[0].eyebrow}
+            </span>
+            <div className="hud-counter-box">
+              01 / {String(reelCount).padStart(2, "0")}
+            </div>
+          </div>
+
+          {/* بطاقات التيليميتري السينمائية العائمة */}
+          <div className="cine-cards-wrapper">
+            {vehicle.reels.map((reel, i) => (
+              <article
+                key={reel.code}
+                className={`cine-hud-card align-${reel.alignment}`}
+                style={{ opacity: i === 0 ? 1 : 0 }}
+              >
+                <span className="card-corner corner-tl" />
+                <span className="card-corner corner-tr" />
+                <span className="card-corner corner-bl" />
+                <span className="card-corner corner-br" />
+
+                <div className="cine-card-header">
+                  <span className="cine-card-tag">
+                    <Zap size={11} /> SCENE {reel.code}
+                  </span>
+                  <span>{reel.camera.toUpperCase()} VIEW</span>
+                </div>
+
+                <div className="cine-card-eyebrow">
+                  <i />
+                  <span>{reel.eyebrow}</span>
+                </div>
+
+                <h2 className="cine-card-title">{reel.title}</h2>
+                <p className="cine-card-copy">{reel.copy}</p>
+
+                <div className="cine-card-badges">
+                  {reel.badges.map((badge, bi) => (
+                    <span key={bi} className="cine-badge-item">
+                      <Zap size={10} /> {badge}
+                    </span>
+                  ))}
+                </div>
+
+                <footer className="cine-card-footer">
+                  <span>{reel.fact}</span>
+                  <span>DRIVEFORM STUDIO</span>
+                </footer>
+              </article>
+            ))}
+          </div>
+
+          {/* شريط التحكم السينمائي والتايم لاين السفلي */}
+          <div className="cine-player-dock">
+            <div className="dock-actions">
+              <button
+                className={`dock-btn-play ${isPlaying ? "is-playing" : ""}`}
+                onClick={togglePlay}
+                aria-label="تشغيل الجولة التلقائية"
+              >
+                {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+                <span>{isPlaying ? "إيقاف" : "تشغيل المشهد"}</span>
+              </button>
+            </div>
+
+            <div className="dock-timeline">
+              <div className="dock-track">
+                <div className="dock-playhead" />
+              </div>
+              <div className="dock-chapters">
+                {vehicle.reels.map((reel, i) => (
+                  <button
+                    key={reel.code}
+                    className={`chapter-btn ${i === 0 ? "is-active" : ""}`}
+                    onClick={() => jumpToReel(i)}
+                  >
+                    <span className="chapter-dot" />
+                    <span className="chapter-text">{reel.code}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* علامات عمق التمرير */}
+        <div className="cine-scroll-markers" aria-hidden="true">
+          {vehicle.reels.map((reel, i) => (
+            <div id={`marker-reel-${i}`} className="cine-scroll-marker" key={reel.code} />
+          ))}
+        </div>
+      </section>
+
+      {/* 4. المواصفات الفنية */}
       <section className="spec-section" id="specs">
-        <div className="spec-heading"><p>ملف الطراز / بيانات مرجعية</p><h2>المواصفات،<br />بعد المشهد.</h2></div>
-        <div className="spec-grid">{vehicle.specification.map((item, index) => <div key={item.label}><span>{String(index + 1).padStart(2, "0")}</span><p>{item.label}</p><b>{item.value}</b></div>)}</div>
-        <aside className="spec-source"><Gauge size={18} /><p>{vehicle.source}</p></aside>
+        <div className="spec-heading">
+          <p>بيانات مرجعية معتمدة</p>
+          <h2>المواصفات الفنية للطراز</h2>
+        </div>
+        <div className="spec-grid">
+          {vehicle.specification.map((item, i) => (
+            <div key={item.label}>
+              <span>{String(i + 1).padStart(2, "0")}</span>
+              <p>{item.label}</p>
+              <b>{item.value}</b>
+            </div>
+          ))}
+        </div>
+        <aside className="spec-source">
+          <Gauge size={18} />
+          <p>{vehicle.source}</p>
+        </aside>
       </section>
 
+      {/* 5. قسم المعاينة والحجز */}
       <section className="appointment-section" id="appointment">
-        <div><p>خطوتك التالية</p><h2>المعاينة تبدأ<br />من هنا.</h2></div>
-        <div className="appointment-copy"><p>اختر الطراز الذي تريد أن تمشي معه لقطةً بلقطة. نؤكد معك الفئة المتاحة ووقت الزيارة قبل أي حجز.</p><Link href="/#contact" className="signal-button">اختر موعداً للمعاينة <ArrowUpLeft size={17} /></Link></div>
+        <div>
+          <p>الخطوة القادمة</p>
+          <h2>المعاينة الواقعية تبدأ الآن.</h2>
+        </div>
+        <div className="appointment-copy">
+          <p>
+            اختر الطراز الذي يناسب احتياجك بعد استعراض زواياه بالكامل. نؤكد معك الفئة الدقيقة المتاحة وتفاصيل الحجز في الفرع.
+          </p>
+          <Link href="/#contact" className="signal-button">
+            حجز موعد معاينة في المعرض <ArrowUpLeft size={17} />
+          </Link>
+        </div>
       </section>
     </main>
   );

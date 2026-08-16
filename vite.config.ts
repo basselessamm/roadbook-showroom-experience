@@ -7,16 +7,23 @@ import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 // =============================================================================
-// Manus Debug Collector - Vite Plugin
-// Writes browser logs directly to files, trimmed when exceeding size limit
+// Project paths
 // =============================================================================
 
 const PROJECT_ROOT = import.meta.dirname;
-const LOG_DIR = path.join(PROJECT_ROOT, ".manus-logs");
-const MAX_LOG_SIZE_BYTES = 1 * 1024 * 1024; // 1MB per log file
-const TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6); // Trim to 60% to avoid constant re-trimming
 
-type LogSource = "browserConsole" | "networkRequests" | "sessionReplay";
+// =============================================================================
+// Manus Debug Collector
+// =============================================================================
+
+const LOG_DIR = path.join(PROJECT_ROOT, ".manus-logs");
+const MAX_LOG_SIZE_BYTES = 1 * 1024 * 1024;
+const TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6);
+
+type LogSource =
+  | "browserConsole"
+  | "networkRequests"
+  | "sessionReplay";
 
 function ensureLogDir() {
   if (!fs.existsSync(LOG_DIR)) {
@@ -34,45 +41,70 @@ function trimLogFile(logPath: string, maxSize: number) {
     const keptLines: string[] = [];
     let keptBytes = 0;
 
-    // Keep newest lines (from end) that fit within 60% of maxSize
     const targetSize = TRIM_TARGET_BYTES;
+
     for (let i = lines.length - 1; i >= 0; i--) {
-      const lineBytes = Buffer.byteLength(`${lines[i]}\n`, "utf-8");
-      if (keptBytes + lineBytes > targetSize) break;
+      const lineBytes = Buffer.byteLength(
+        `${lines[i]}\n`,
+        "utf-8"
+      );
+
+      if (keptBytes + lineBytes > targetSize) {
+        break;
+      }
+
       keptLines.unshift(lines[i]);
       keptBytes += lineBytes;
     }
 
-    fs.writeFileSync(logPath, keptLines.join("\n"), "utf-8");
+    fs.writeFileSync(
+      logPath,
+      keptLines.join("\n"),
+      "utf-8"
+    );
   } catch {
-    /* ignore trim errors */
+    // Ignore trim errors.
   }
 }
 
-function writeToLogFile(source: LogSource, entries: unknown[]) {
+function writeToLogFile(
+  source: LogSource,
+  entries: unknown[]
+) {
   if (entries.length === 0) return;
 
   ensureLogDir();
-  const logPath = path.join(LOG_DIR, `${source}.log`);
 
-  // Format entries with timestamps
+  const logPath = path.join(
+    LOG_DIR,
+    `${source}.log`
+  );
+
   const lines = entries.map((entry) => {
     const ts = new Date().toISOString();
+
     return `[${ts}] ${JSON.stringify(entry)}`;
   });
 
-  // Append to log file
-  fs.appendFileSync(logPath, `${lines.join("\n")}\n`, "utf-8");
+  fs.appendFileSync(
+    logPath,
+    `${lines.join("\n")}\n`,
+    "utf-8"
+  );
 
-  // Trim if exceeds max size
-  trimLogFile(logPath, MAX_LOG_SIZE_BYTES);
+  trimLogFile(
+    logPath,
+    MAX_LOG_SIZE_BYTES
+  );
 }
 
 /**
- * Vite plugin to collect browser debug logs
- * - POST /__manus__/logs: Browser sends logs, written directly to files
- * - Files: browserConsole.log, networkRequests.log, sessionReplay.log
- * - Auto-trimmed when exceeding 1MB (keeps newest entries)
+ * Vite plugin to collect browser debug logs.
+ *
+ * POST /__manus__/logs
+ *
+ * Logs are stored inside:
+ * .manus-logs/
  */
 function vitePluginManusDebugCollector(): Plugin {
   return {
@@ -82,15 +114,19 @@ function vitePluginManusDebugCollector(): Plugin {
       if (process.env.NODE_ENV === "production") {
         return html;
       }
+
       return {
         html,
+
         tags: [
           {
             tag: "script",
+
             attrs: {
               src: "/__manus__/debug-collector.js",
               defer: true,
             },
+
             injectTo: "head",
           },
         ],
@@ -98,157 +134,370 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
-      // POST /__manus__/logs: Browser sends logs (written directly to files)
-      server.middlewares.use("/__manus__/logs", (req, res, next) => {
-        if (req.method !== "POST") {
-          return next();
+      server.middlewares.use(
+        "/__manus__/logs",
+        (req, res, next) => {
+          if (req.method !== "POST") {
+            return next();
+          }
+
+          const handlePayload = (
+            payload: any
+          ) => {
+            if (
+              payload.consoleLogs?.length > 0
+            ) {
+              writeToLogFile(
+                "browserConsole",
+                payload.consoleLogs
+              );
+            }
+
+            if (
+              payload.networkRequests?.length > 0
+            ) {
+              writeToLogFile(
+                "networkRequests",
+                payload.networkRequests
+              );
+            }
+
+            if (
+              payload.sessionEvents?.length > 0
+            ) {
+              writeToLogFile(
+                "sessionReplay",
+                payload.sessionEvents
+              );
+            }
+
+            res.writeHead(200, {
+              "Content-Type":
+                "application/json",
+            });
+
+            res.end(
+              JSON.stringify({
+                success: true,
+              })
+            );
+          };
+
+          const reqBody = (
+            req as {
+              body?: unknown;
+            }
+          ).body;
+
+          if (
+            reqBody &&
+            typeof reqBody === "object"
+          ) {
+            try {
+              handlePayload(reqBody);
+            } catch (e) {
+              res.writeHead(400, {
+                "Content-Type":
+                  "application/json",
+              });
+
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  error: String(e),
+                })
+              );
+            }
+
+            return;
+          }
+
+          let body = "";
+
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          req.on("end", () => {
+            try {
+              const payload =
+                JSON.parse(body);
+
+              handlePayload(payload);
+            } catch (e) {
+              res.writeHead(400, {
+                "Content-Type":
+                  "application/json",
+              });
+
+              res.end(
+                JSON.stringify({
+                  success: false,
+                  error: String(e),
+                })
+              );
+            }
+          });
         }
-
-        const handlePayload = (payload: any) => {
-          // Write logs directly to files
-          if (payload.consoleLogs?.length > 0) {
-            writeToLogFile("browserConsole", payload.consoleLogs);
-          }
-          if (payload.networkRequests?.length > 0) {
-            writeToLogFile("networkRequests", payload.networkRequests);
-          }
-          if (payload.sessionEvents?.length > 0) {
-            writeToLogFile("sessionReplay", payload.sessionEvents);
-          }
-
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: true }));
-        };
-
-        const reqBody = (req as { body?: unknown }).body;
-        if (reqBody && typeof reqBody === "object") {
-          try {
-            handlePayload(reqBody);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-          return;
-        }
-
-        let body = "";
-        req.on("data", (chunk) => {
-          body += chunk.toString();
-        });
-
-        req.on("end", () => {
-          try {
-            const payload = JSON.parse(body);
-            handlePayload(payload);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-        });
-      });
+      );
     },
   };
 }
+
+// =============================================================================
+// Local Manus Storage Proxy
+// =============================================================================
+//
+// The original project expects images at:
+//
+// /manus-storage/<filename>
+//
+// The hosted version gets these files from Manus Storage.
+//
+// For local development we downloaded the assets into:
+//
+// client/public/manus-storage/
+//
+// This plugin serves those local files while keeping the
+// original URLs unchanged.
+// =============================================================================
 
 function vitePluginStorageProxy(): Plugin {
   return {
     name: "manus-storage-proxy",
+
     configureServer(server: ViteDevServer) {
-      server.middlewares.use("/manus-storage", async (req, res) => {
-        const key = req.url?.replace(/^\//, "");
-        if (!key) {
-          res.writeHead(400, { "Content-Type": "text/plain" });
-          res.end("Missing storage key");
-          return;
-        }
+      server.middlewares.use(
+        "/manus-storage",
+        (req, res) => {
+          const key = req.url?.replace(
+            /^\//,
+            ""
+          );
 
-        const forgeBaseUrl = (process.env.BUILT_IN_FORGE_API_URL || "").replace(/\/+$/, "");
-        const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
+          if (!key) {
+            res.writeHead(400, {
+              "Content-Type":
+                "text/plain",
+            });
 
-        if (!forgeBaseUrl || !forgeKey) {
-          res.writeHead(500, { "Content-Type": "text/plain" });
-          res.end("Storage proxy not configured");
-          return;
-        }
+            res.end(
+              "Missing storage key"
+            );
 
-        try {
-          const forgeUrl = new URL("v1/storage/presign/get", forgeBaseUrl + "/");
-          forgeUrl.searchParams.set("path", key);
+            return;
+          }
 
-          const forgeResp = await fetch(forgeUrl, {
-            headers: { Authorization: `Bearer ${forgeKey}` },
+          const storageRoot =
+            path.resolve(
+              PROJECT_ROOT,
+              "client",
+              "public",
+              "manus-storage"
+            );
+
+          const localPath =
+            path.resolve(
+              storageRoot,
+              key
+            );
+
+          // Prevent path traversal.
+          if (
+            localPath !== storageRoot &&
+            !localPath.startsWith(
+              storageRoot + path.sep
+            )
+          ) {
+            res.writeHead(403, {
+              "Content-Type":
+                "text/plain",
+            });
+
+            res.end(
+              "Invalid storage path"
+            );
+
+            return;
+          }
+
+          if (
+            !fs.existsSync(localPath)
+          ) {
+            res.writeHead(404, {
+              "Content-Type":
+                "text/plain",
+            });
+
+            res.end(
+              `Local storage asset not found: ${key}`
+            );
+
+            return;
+          }
+
+          const ext =
+            path
+              .extname(localPath)
+              .toLowerCase();
+
+          const contentTypes: Record<
+            string,
+            string
+          > = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".webp": "image/webp",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+            ".avif": "image/avif",
+          };
+
+          res.writeHead(200, {
+            "Content-Type":
+              contentTypes[ext] ||
+              "application/octet-stream",
+
+            "Cache-Control":
+              "public, max-age=31536000",
           });
 
-          if (!forgeResp.ok) {
-            res.writeHead(502, { "Content-Type": "text/plain" });
-            res.end("Storage backend error");
-            return;
-          }
-
-          const { url } = (await forgeResp.json()) as { url: string };
-          if (!url) {
-            res.writeHead(502, { "Content-Type": "text/plain" });
-            res.end("Empty signed URL");
-            return;
-          }
-
-          res.writeHead(307, { Location: url, "Cache-Control": "no-store" });
-          res.end();
-        } catch {
-          res.writeHead(502, { "Content-Type": "text/plain" });
-          res.end("Storage proxy error");
+          fs.createReadStream(
+            localPath
+          ).pipe(res);
         }
-      });
+      );
     },
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
+// =============================================================================
+// Plugins
+// =============================================================================
+
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  vitePluginStorageProxy(),
+];
+
+// =============================================================================
+// GitHub Pages Assets
+// =============================================================================
 
 /**
- * GitHub Pages لا يوفّر مسار /manus-storage الخاص بالاستضافة الحالية. عند بناء
- * نسخة النشر فقط نُحوّل مراجع الصور الرسمية إلى رابطها العام، من دون تغيير
- * تجربة التطوير أو النشر الحالي.
+ * GitHub Pages does not provide the original
+ * /manus-storage route.
+ *
+ * During GitHub Pages builds we replace the
+ * storage paths with the public Manus Storage
+ * origin.
  */
 function vitePluginGitHubPagesAssets(): Plugin {
-  const assetOrigin = "https://kafrawicars-undfwezj.manus.space";
+  const assetOrigin =
+    "https://kafrawicars-undfwezj.manus.space";
 
   return {
     name: "github-pages-public-assets",
-    enforce: "pre",
-    transform(code, id) {
-      if (process.env.GITHUB_PAGES !== "true" || !/\.(?:[jt]sx?|css)$/.test(id)) return null;
-      const transformed = code
-        .replaceAll('"/manus-storage/', `"${assetOrigin}/manus-storage/`)
-        .replaceAll("'/manus-storage/", `'${assetOrigin}/manus-storage/`);
 
-      return transformed === code ? null : { code: transformed, map: null };
+    enforce: "pre",
+
+    transform(code, id) {
+      if (
+        process.env.GITHUB_PAGES !== "true" ||
+        !/\.(?:[jt]sx?|css)$/.test(id)
+      ) {
+        return null;
+      }
+
+      const transformed = code
+        .replaceAll(
+          '"/manus-storage/',
+          `"${assetOrigin}/manus-storage/`
+        )
+        .replaceAll(
+          "'/manus-storage/",
+          `'${assetOrigin}/manus-storage/`
+        );
+
+      return transformed === code
+        ? null
+        : {
+          code: transformed,
+          map: null,
+        };
     },
   };
 }
 
-const isGitHubPagesBuild = process.env.GITHUB_PAGES === "true";
+// =============================================================================
+// Environment
+// =============================================================================
+
+const isGitHubPagesBuild =
+  process.env.GITHUB_PAGES === "true";
+
+// =============================================================================
+// Vite configuration
+// =============================================================================
 
 export default defineConfig({
-  base: isGitHubPagesBuild ? "/roadbook-showroom-experience/" : "/",
-  plugins: [...plugins, vitePluginGitHubPagesAssets()],
+  base: isGitHubPagesBuild
+    ? "/roadbook-showroom-experience/"
+    : "/",
+
+  plugins: [
+    ...plugins,
+    vitePluginGitHubPagesAssets(),
+  ],
+
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": path.resolve(
+        PROJECT_ROOT,
+        "client",
+        "src"
+      ),
+
+      "@shared": path.resolve(
+        PROJECT_ROOT,
+        "shared"
+      ),
+
+      "@assets": path.resolve(
+        PROJECT_ROOT,
+        "attached_assets"
+      ),
     },
   },
-  envDir: path.resolve(import.meta.dirname),
-  root: path.resolve(import.meta.dirname, "client"),
+
+  envDir: PROJECT_ROOT,
+
+  root: path.resolve(
+    PROJECT_ROOT,
+    "client"
+  ),
+
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(
+      PROJECT_ROOT,
+      "dist/public"
+    ),
+
     emptyOutDir: true,
   },
+
   server: {
     port: 3000,
-    strictPort: false, // Will find next available port if 3000 is busy
+
+    strictPort: false,
+
     host: true,
+
     allowedHosts: [
       ".manuspre.computer",
       ".manus.computer",
@@ -258,9 +507,13 @@ export default defineConfig({
       "localhost",
       "127.0.0.1",
     ],
+
     fs: {
       strict: true,
-      deny: ["**/.*"],
+
+      deny: [
+        "**/.*",
+      ],
     },
   },
 });
