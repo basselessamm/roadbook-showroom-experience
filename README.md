@@ -1,56 +1,51 @@
-# Roadbook Automotive Experience
+# 🚗 Roadbook Automotive Experience
 
-واجهة عربية RTL لمعرض سيارات، مبنية كتجربة استكشاف سينمائية هادئة حول صور سيارات رسمية، مع صفحات طرازات مستقلة، عارض صور تفاعلي، بحث سريع، مقارنة، ومخزون داخلي.
+<div align="center">
+  <img src="https://img.shields.io/badge/React-19-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" />
+</div>
 
-> **رابط العرض الحالي:** https://basselessamm.github.io/roadbook-showroom-experience/
+---
 
-## ما الذي يتضمنه المشروع؟
+### 📖 Overview
+**Roadbook** is a cinematic, Arabic RTL automotive showroom experience. It is designed to provide an immersive exploration of official car imagery, featuring independent model pages, interactive image viewers, and a high-performance inventory system.
 
-| المسار | الوظيفة |
-|---|---|
-| `/` | صفحة رئيسية ببنرات سيارات قابلة للسحب، بحث سريع، مقارنة، وخدمات. |
-| `/inventory` | مخزون داخلي مع مرشحات وبطاقات طرازات ونافذة تفاصيل. |
-| `/cars/h6-hev` | رحلة بصرية لطراز Haval H6 HEV، مع متصفح صور تفاعلي للزوايا الرسمية المتاحة. |
-| `/cars/tiggo-8` | رحلة بصرية لطراز Chery Tiggo 8 Pro Max، مع متصفح 360° مبني على 36 إطاراً رسمياً. |
+### ✨ Key Features
+- **🎬 Cinematic UI:** A calm and focused exploration experience centered around high-quality automotive visuals.
+- **🔄 360° Car Viewer:** Interactive 360-degree exploration for specific models (e.g., Chery Tiggo 8 Pro Max).
+- **📱 Responsive RTL Design:** Fully optimized for Arabic language and right-to-left layouts.
+- **🔍 Fast Inventory:** Advanced filtering and search capabilities for browsing available car stocks.
+- **⚡ Modern Tech Stack:** Built with the latest React 19, Vite, and Tailwind CSS 4 for maximum performance.
 
-## التشغيل محلياً
+### 🛠️ Tech Stack
+- **Frontend:** React 19, TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS 4
+- **Routing:** Wouter
+- **Deployment:** GitHub Pages
 
-يتطلب المشروع Node.js 22 أو أحدث وpnpm.
+### 🚀 Live Demo
+Experience the showroom live at: [https://basselessamm.github.io/roadbook-showroom-experience/](https://basselessamm.github.io/roadbook-showroom-experience/)
 
-```bash
-pnpm install
-pnpm dev
-```
+### 📥 Getting Started
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/basselessamm/roadbook-showroom-experience.git
+   ```
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Run the development server:
+   ```bash
+   pnpm dev
+   ```
 
-لإنشاء نسخة إنتاجية والتحقق من الأنواع:
+---
 
-```bash
-pnpm check
-pnpm build
-```
-
-## البنية التقنية
-
-المشروع مبني باستخدام React 19 وTypeScript وVite، مع Tailwind CSS 4 وWouter. يقع كود الواجهة تحت `client/src`، وتوجد صفحات المستخدم ضمن `client/src/pages`.
-
-| الملف أو المجلد | المسؤولية |
-|---|---|
-| `client/src/pages/Home.tsx` | الصفحة الرئيسية والتفاعل مع البانرات والبحث والمقارنة والحجز. |
-| `client/src/pages/Inventory.tsx` | صفحة المخزون والمرشحات وتفاصيل الطرازات. |
-| `client/src/pages/VehicleExperience.tsx` | صفحات الطرازات، مسار البكرات، وعارض الصور التفاعلي. |
-| `client/src/continuous-film-journey.css` | الطبقة البصرية الرئيسة لرحلة التمرير السينمائية. |
-| `client/src/index.css` | رموز التصميم، الخطوط، والقواعد العامة. |
-
-## الأصول والاستضافة
-
-تستخدم الواجهة أصولاً رسمية مستضافة ضمن مسارات `/manus-storage/`. ويقوم بناء GitHub Pages بتحويل هذه المسارات إلى روابط عامة ثابتة للأصول كي تظهر الصور وإطارات العارض في النسخة المنشورة.
-
-يُنشر الموقع تلقائياً على GitHub Pages عند كل تحديث لفرع `main` عبر سير العمل في `.github/workflows/deploy-github-pages.yml`. إذا نُقلت الأصول إلى تخزين آخر مستقبلاً، يجب تحديث رابط المصدر في إعداد البناء قبل النشر.
-
-## حدود تشغيلية معروفة
-
-الواجهة جاهزة للعرض والكتالوج، لكن نموذج طلب المعاينة لا يرسل بيانات إلى جهة خارجية بعد. قبل الإطلاق التجاري يجب اعتماد بيانات الفروع ووسيلة الاتصال وربط النموذج بواتساب أعمال أو CRM، ثم تثبيت الفئات والأسعار والتوفر الفعلي.
-
-## الترخيص
-
-هذه نسخة عرض مستقلة. لا يجوز إعادة استخدام الصور الرسمية أو أسماء العلامات أو المواد التابعة للمصنّعين خارج هذا العرض من دون موافقة أصحابها.
+<p align="center">
+  <i>"Redefining the digital automotive showroom experience."</i>
+</p>
